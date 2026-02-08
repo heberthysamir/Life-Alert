@@ -1,6 +1,8 @@
 class Usuario:
-    def __init__(self, id, nome, cpf, telefone, email, senha, tipo):
-        self.id = id
+    _id_auto = 1
+    def __init__(self, nome, cpf, telefone, email, senha, tipo):
+        self.id = Usuario._id_auto
+        Usuario._id_auto += 1
         self.nome = nome
         self.cpf = cpf
         self.telefone = telefone
@@ -8,14 +10,23 @@ class Usuario:
         self.senha = senha
         self.tipo = tipo
 
+    def __str__(self):
+        return f"[{self.id}] {self.nome} - {self.tipo}"
+
     def novoUsuario():
         pass
 
-    def atualizarUsuario():
-        pass
+    def atualizarUsuario(self, novo_nome=None, novo_telefone=None, novo_email=None, nova_senha=None):
+        if novo_nome: self.nome = novo_nome
+        if novo_telefone: self.telefone = novo_telefone
+        if novo_email: self.email = novo_email
+        if nova_senha: self.senha = nova_senha
 
-    def excluirUsuario():
-        pass
+    def excluirUsuario(self, lista_usuarios):
+        if self in lista_usuarios:
+            lista_usuarios.remove(self)
+            return True
+        return False
 
     def lerUsuarios():
         pass
@@ -24,16 +35,15 @@ class Usuario:
         pass
 
 class Civil(Usuario):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, nome, cpf, telefone, email, senha):
+        super().__init__(nome, cpf, telefone, email, senha, tipo="Civil")
 
     def registrarOcorrencia():
         pass
 
 class Atendente(Usuario):
-    def __init__(self, equipe, turno, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.equipe = equipe
+    def __init__(self, nome, cpf, telefone, email, senha, turno):
+        super().__init__(nome, cpf, telefone, email, senha, tipo="Atendente")
         self.turno = turno
 
     def analisarOcorencia():
@@ -46,12 +56,10 @@ class Atendente(Usuario):
         pass
 
 class Agente(Usuario):
-    def __init__(self, cargo, funcao, status, equipeResgate, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, nome, cpf, telefone, email, senha, cargo, status):
+        super().__init__(nome, cpf, telefone, email, senha, tipo="Agente")
         self.cargo = cargo
-        self.funcao = funcao
         self.status = status
-        self.equipeResgate = equipeResgate
 
     def atualizarOcorrencia():
         pass
