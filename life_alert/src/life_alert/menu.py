@@ -31,6 +31,48 @@ def menuPrincipal():
         else:
             print("Opção inválida")
 
+def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
+        print(f"\n --- Gerenciar equipes (Líder: {usuario_logado.nome}) ---\n")
+
+        minhasEquipes = [e for e in lista_equipes if usuario_logado in e.agentes]
+
+        if not minhasEquipes:
+            print("Você não está cadastrado em nenhuma equipe.")
+            return
+        
+        print("\nSuas equipes cadastradas: \n")
+        for equipe in minhasEquipes:
+            print(equipe)
+        
+        idEquipe = input("Digite o ID da equipe à gerenciar: \n")
+        equipeSelecionada = next((e for e in minhasEquipes if str(e.id) == idEquipe), None)
+
+        if not equipeSelecionada: 
+            print("Equipe não encontrada ou você não tem permissão para gerenciá-la")
+            return
+        
+        while True:
+            print(f"\n --- Gestão da equipe {equipeSelecionada.id} ({equipeSelecionada.especialidade}) --- \n")
+            print("1 - Adicionar Agente")
+            print("2 - Remover Agente")
+            print("3 - Atualizar Status de Agente")
+            print("4 - Listar Membros")
+            print("0 - Voltar")
+            cmd = input("Insira a opção desejada: \n")
+
+            if cmd == "1":
+                equipeSelecionada.adicionarMembro(lista_usuarios)
+            elif cmd == "2":
+                equipeSelecionada.removerMembro()
+            elif cmd == "3":
+                equipeSelecionada.atualizarStatusMembro()
+            elif cmd == "4":
+                equipeSelecionada.listarMembros()
+            elif cmd == "0":
+                break
+            else:
+                print("Opção inválida, tente novamente.")
+ 
 def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes):
     while True:
         print(f"Usuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
@@ -112,12 +154,13 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 print("\nGerenciar Resgate em Andamento")
             elif opcao == "4":
                 print("\nCadastrar Vítima")
-            elif opcao == "5" and usuario.cargo.lower() == "lider":
-                nova_equipe = EquipeResgate.cadastrarEquipe(lista_equipes)
-                if nova_equipe:
-                    lista_equipes.append(nova_equipe)
-            elif opcao == "6" and usuario.cargo.lower() == "lider":
-                print("\nGerenciar Membros da Equipe")
+            elif usuario.cargo.lower() == "lider":
+                if opcao == "5":
+                    EquipeResgate.cadastrarEquipe(lista_equipes, usuario)
+                elif opcao == "6":
+                    menuEquipe(lista_equipes, usuarios, usuario)
+                elif opcao == "7":
+                    EquipeResgate.listarEquipes(lista_equipes)
 
 if __name__ == "__main__":
     menuPrincipal()
