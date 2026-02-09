@@ -17,7 +17,7 @@ class EquipeResgate:
     def cadastrarEquipe(lista_equipes):
         print("\n--- Cadastro de Nova Equipe de Resgate ---")
         localidade = input("Localidade da base: ")
-        setor = input("Setor de atuação (Saúde, ambiental, policial): ")
+        setor = input("Setor de atuação (ex.: SAMU, PM, SUS, PRF...): ")
         especialidade = input("Especialidade (ex: Incêndios, Resgate em Altura, Primeiros Socorros): ")
         
         nova_equipe = EquipeResgate(
