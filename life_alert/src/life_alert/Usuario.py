@@ -96,7 +96,7 @@ class Atendente(Usuario):
         super().__init__(nome, cpf, telefone, email, senha, tipo="Atendente")
         self.turno = turno
 
-    def analisarOcorencia():
+    def analisarOcorrencia():
         pass
 
     def encaminharResgate():
