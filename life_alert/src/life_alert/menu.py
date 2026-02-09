@@ -1,10 +1,13 @@
 from Usuario import Usuario, Civil, Atendente, Agente
 from Atendimento import Atendimento
 from Ocorrencia import Ocorrencia
+from EquipeResgate import EquipeResgate
 
 usuarios = []
 ocorrencias = []
 atendimentos = []
+equipes = []
+agentes = []
 
 def menuPrincipal():
     while True:
@@ -19,7 +22,7 @@ def menuPrincipal():
             Usuario.listarUsuarios(usuarios)
             usuario_logado = Usuario.Login(usuarios)
             if usuario_logado:
-                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos)
+                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes)
         elif opcao == "2":
             Usuario.criarUsuario(usuarios)
         elif opcao == "0":
@@ -28,7 +31,7 @@ def menuPrincipal():
         else:
             print("Opção inválida")
 
-def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos):
+def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes):
     while True:
         print(f"Usuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
         print("0 - Logout")
@@ -110,7 +113,9 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos):
             elif opcao == "4":
                 print("\nCadastrar Vítima")
             elif opcao == "5" and usuario.cargo.lower() == "lider":
-                print("\nCadastrar Nova Equipe de Resgate")
+                nova_equipe = EquipeResgate.cadastrarEquipe(lista_equipes)
+                if nova_equipe:
+                    lista_equipes.append(nova_equipe)
             elif opcao == "6" and usuario.cargo.lower() == "lider":
                 print("\nGerenciar Membros da Equipe")
 
