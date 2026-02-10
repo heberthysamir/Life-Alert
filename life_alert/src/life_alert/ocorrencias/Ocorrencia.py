@@ -1,5 +1,7 @@
 import datetime
-from Usuario import Civil, Atendente, Agente
+from usuarios.UsuarioCivil import Civil
+from usuarios.UsuarioAtendente import Atendente
+from usuarios.UsuarioAgente import Agente
 
 class Ocorrencia:
     _id_auto = 1
@@ -30,6 +32,8 @@ class Ocorrencia:
 
     @staticmethod
     def abrirOcorrencia(lista_usuarios, usuario_logado):
+        from .OcorrenciaMedica import OcorrenciaMedica
+        from .OcorrenciaPolicial import OcorrenciaPolicial
         print("\nAbertura de Ocorrência:")
         print("\n1 - Policial")
         print("\n2 - Médica")
@@ -70,29 +74,3 @@ class Ocorrencia:
             return ocorrencia
     
         return None
-
-class OcorrenciaPolicial(Ocorrencia):
-    def __init__(self, tipoCrime, qtdCriminosos, descricaoSuspeito, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.tipoCrime = tipoCrime
-        self.qtdCriminosos = qtdCriminosos
-        self.descricaoSuspeito = descricaoSuspeito
-
-    def registrarBoletim(self):
-        print(f"Boletim registrado para ocorrência policial: {self.tipoCrime}")
-
-class OcorrenciaMedica(Ocorrencia):
-    def __init__(self, perfilMedico, sintomas, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.perfilMedico = perfilMedico
-        self.sintomas = sintomas
-
-    def registrarSintomas(self):
-        sintomas = input("Digite os sintomas do paciente: ")
-        self.sintomas = sintomas
-        print(f"Sintomas registrados para ocorrência médica: {self.sintomas}")
-
-    def enviarPerfilmedico(self):
-        perfilMedico = input("Digite o perfil médico do paciente: ")
-        self.perfilMedico = perfilMedico
-        print(f"Perfil médico enviado para ocorrência médica: {self.perfilMedico}")
