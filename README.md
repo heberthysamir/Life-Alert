@@ -21,14 +21,14 @@ life_alert/
 |   |   ├── Ocorrencia.py
 |   |   ├── OcorrenciaMedica.py
 |   |   ├── OcorrenciaPolicial.py
-|   |   ├── __init__.py
+|   |   └── __init__.py
 |
 |   ├── usuarios/
 |   |   ├── Usuario.py
 |   |   ├── UsuarioAgente.py
 |   |   ├── UsuarioAtendente.py
 |   |   ├── UsuarioCivil.py
-|   |   ├── __init__.py
+|   |   └── __init__.py
 |
 |   ├── Alerta.py
 |   ├── Atendimento.py
@@ -41,7 +41,7 @@ life_alert/
 |   └── menu.py
 |
 ├── tests/           
-|   ├── __init__.py
+|   └── __init__.py
 |
 ├── README.md
 ├── poetry.lock
