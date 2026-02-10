@@ -10,4 +10,42 @@
   
   Este projeto é desenvolvido e efetuado por estudantes da graduação de Engenharia de Software, na Universidade Federal do Cariri (UFCA), como componente da disciplina de **Programação Orientada a Objetos**, ministrada pelo professor **Jayr Alencar Pereira**.
 
+## Estrutura do código:
+
+```
+
+life_alert/
+|
+├── src/life_alert/           
+|   ├── ocorrencias/
+|   |   ├── Ocorrencia.py
+|   |   ├── OcorrenciaMedica.py
+|   |   ├── OcorrenciaPolicial.py
+|   |   ├── __init__.py
+|
+|   ├── usuarios/
+|   |   ├── Usuario.py
+|   |   ├── UsuarioAgente.py
+|   |   ├── UsuarioAtendente.py
+|   |   ├── UsuarioCivil.py
+|   |   ├── __init__.py
+|
+|   ├── Alerta.py
+|   ├── Atendimento.py
+|   ├── EquipeResgate.py
+|   ├── PerfilMedico.py
+|   ├── Relatorio.py
+|   ├── Regate.py
+|   ├── Vitima.py
+|   ├── __init__.py
+|   └── menu.py
+|
+├── tests/           
+|   ├── __init__.py
+|
+├── README.md
+├── poetry.lock
+└── pypoject.toml
+
+```
 
