@@ -1,3 +1,4 @@
+
 class Usuario:
     _id_auto = 1
     def __init__(self, nome, cpf, telefone, email, senha, tipo):
@@ -24,6 +25,9 @@ class Usuario:
     
     @staticmethod
     def criarUsuario(lista_usuarios):
+        from .UsuarioCivil import Civil
+        from .UsuarioAtendente import Atendente
+        from .UsuarioAgente import Agente
         print("\nCriar Novo Usuário:")
         print("1 - Civil")
         print("2 - Atendente")
@@ -83,39 +87,3 @@ class Usuario:
             lista_usuarios.remove(self)
             return True
         return False
-
-class Civil(Usuario):
-    def __init__(self, nome, cpf, telefone, email, senha):
-        super().__init__(nome, cpf, telefone, email, senha, tipo="Civil")
-
-    def registrarOcorrencia():
-        pass
-
-class Atendente(Usuario):
-    def __init__(self, nome, cpf, telefone, email, senha, turno):
-        super().__init__(nome, cpf, telefone, email, senha, tipo="Atendente")
-        self.turno = turno
-
-    def analisarOcorrencia():
-        pass
-
-    def encaminharResgate():
-        pass
-
-    def emitirAlerta():
-        pass
-
-class Agente(Usuario):
-    def __init__(self, nome, cpf, telefone, email, senha, cargo, status):
-        super().__init__(nome, cpf, telefone, email, senha, tipo="Agente")
-        self.cargo = cargo
-        self.status = status
-
-    def atualizarOcorrencia():
-        pass
-
-    def cadastrarEquipe():
-        pass
-
-    def removerEquipe():
-        pass

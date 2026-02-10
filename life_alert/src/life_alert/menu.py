@@ -1,6 +1,6 @@
-from Usuario import Usuario, Civil, Atendente, Agente
+from usuarios.Usuario import Usuario
 from Atendimento import Atendimento
-from Ocorrencia import Ocorrencia
+from ocorrencias.Ocorrencia import Ocorrencia
 from EquipeResgate import EquipeResgate
 
 usuarios = []

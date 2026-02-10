@@ -1,4 +1,4 @@
-from Usuario import Agente
+from usuarios.UsuarioAgente import Agente
 
 class EquipeResgate:
     _id_auto = 1
