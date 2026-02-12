@@ -14,6 +14,11 @@ class Usuario:
     def __str__(self):
         return f"[{self.id}] {self.nome} - {self.tipo}"
     
+    def exibirMenu(self):
+        print("0 - Logout")
+        print("1 - Atualizar dados")
+        print("2 - Apagar conta")
+    
     @staticmethod
     def listarUsuarios(lista_usuarios):
         print("\nUsuários Cadastrados:")
@@ -22,44 +27,6 @@ class Usuario:
             return
         for u in lista_usuarios:
             print(u)
-    
-    @staticmethod
-    def criarUsuario(lista_usuarios):
-        from .UsuarioCivil import Civil
-        from .UsuarioAtendente import Atendente
-        from .UsuarioAgente import Agente
-        print("\nCriar Novo Usuário:")
-        print("1 - Civil")
-        print("2 - Atendente")
-        print("3 - Agente")
-        opcao = input("Escolha o tipo: ")
-
-        nome = input("Nome: ")
-        cpf = input("CPF: ")
-        telefone = input("Telefone: ")
-        email = input("Email: ")
-        senha = input("Senha: ")
-        usuario = None
-
-        if opcao == "1":
-            usuario = Civil(nome, cpf, telefone, email, senha)
-            
-        elif opcao == "2":
-            turno = input("Turno (manha/tarde/noite): ")
-            usuario = Atendente(nome, cpf, telefone, email, senha, turno)
-
-        elif opcao == "3":
-            cargo = input("Cargo (lider/operacional): ")
-            status = True 
-            usuario = Agente(nome, cpf, telefone, email, senha, cargo, status)
-        
-        else:
-            print("Opção inválida!")
-            return
-
-        if usuario:
-            lista_usuarios.append(usuario)
-            print(f"\n{usuario.tipo}: {usuario.nome} cadastrado com sucesso!")
 
     @staticmethod
     def Login(lista_usuarios):

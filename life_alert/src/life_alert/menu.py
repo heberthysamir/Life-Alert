@@ -2,6 +2,7 @@ from usuarios.Usuario import Usuario
 from Atendimento import Atendimento
 from ocorrencias.Ocorrencia import Ocorrencia
 from EquipeResgate import EquipeResgate
+from usuarios.usuarioFactory import UsuarioFactory
 
 usuarios = []
 ocorrencias = []
@@ -24,7 +25,7 @@ def menuPrincipal():
             if usuario_logado:
                 menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes)
         elif opcao == "2":
-            Usuario.criarUsuario(usuarios)
+            criarUsuario(usuarios)
         elif opcao == "0":
             print("Encerrando sistema...")
             break
@@ -75,28 +76,8 @@ def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
  
 def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes):
     while True:
-        print(f"Usuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
-        print("0 - Logout")
-        print("1 - Atualizar dados")
-        print("2 - Apagar conta")
-        
-        if usuario.tipo == "Civil":
-            print("3 - Registrar Ocorrência")
-            print("4 - Acompanhar minhas Ocorrências")
-
-        elif usuario.tipo == "Atendente":
-            print("3 - Analisar Ocorrência")
-            print("4 - Encaminhar para Resgate")
-            print("5 - Emitir Alerta Geral")
-
-        elif usuario.tipo == "Agente":
-            print("3 - Gerenciar Resgate em Andamento")
-            print("4 - Cadastrar Vítima")
-            
-            if usuario.cargo.lower() == "lider":
-                print("5 - Cadastrar Nova Equipe de Resgate")
-                print("6 - Gerenciar Membros da Equipe")
-                
+        print(f"\nUsuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
+        usuario.exibirMenu()
         opcao = input("Escolha uma opção: ")
         
         if opcao == "0":
@@ -161,6 +142,40 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                     menuEquipe(lista_equipes, usuarios, usuario)
                 elif opcao == "7":
                     EquipeResgate.listarEquipes(lista_equipes)
+
+def criarUsuario(lista_usuarios):
+    print("\nCRIAR NOVO USUÁRIO")
+    print("1 - Civil")
+    print("2 - Atendente")
+    print("3 - Agente")
+
+    tipo = input("Escolha o tipo: ")
+
+    dados = {
+        "nome": input("Nome: "),
+        "cpf": input("CPF: "),
+        "telefone": input("Telefone: "),
+        "email": input("Email: "),
+        "senha": input("Senha: ")
+    }
+
+    if tipo == "2":
+        dados["turno"] = input("Turno: ")
+
+    elif tipo == "3":
+        dados["cargo"] = input("Cargo (Ex: Líder, Operacional): ")
+        dados["status"] = True 
+
+    try:
+        usuario = UsuarioFactory.criar(tipo, **dados)
+        lista_usuarios.append(usuario)
+        print(f"\n{usuario.tipo} '{usuario.nome}' criado com sucesso!")
+        
+    except ValueError as e:
+        print(f"\nErro: {e}")
+    except TypeError as e:
+        print(f"\nErro de Atributo: Verifique se os campos extras estão corretos nas subclasses.")
+        print(f"Detalhe técnico: {e}")
 
 if __name__ == "__main__":
     menuPrincipal()
