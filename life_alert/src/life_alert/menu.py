@@ -2,13 +2,15 @@ from usuarios.Usuario import Usuario
 from Atendimento import Atendimento
 from ocorrencias.Ocorrencia import Ocorrencia
 from EquipeResgate import EquipeResgate
-from usuarios.usuarioFactory import UsuarioFactory
+from application.usuariosFactory import UsuarioFactory
+from application.alertasFactory import AlertaFactory
 
 usuarios = []
 ocorrencias = []
 atendimentos = []
 equipes = []
 agentes = []
+alertas = []
 
 def menuPrincipal():
     while True:
@@ -79,6 +81,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
         print(f"\nUsuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
         usuario.exibirMenu()
         opcao = input("Escolha uma opção: ")
+        mostrarAlertas(alertas)
         
         if opcao == "0":
             break
@@ -107,6 +110,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                     print(f"\nUsuário não encontrado")
 
         elif usuario.tipo == "Civil":
+            mostrarAlertas(alertas)
             if opcao == "3":
                 ocorrencia = Ocorrencia.abrirOcorrencia(usuarios, usuario)
                 if ocorrencia:
@@ -128,7 +132,15 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
             elif opcao == "4":
                 print("\nEncaminhar para Resgate")
             elif opcao == "5":
-                print("\nEmitir Alerta Geral")
+                print("1 - Criar Alerta")
+                print("2 - Cancelar Alerta")
+                sub_opcao = input("Escolha: ")
+                if sub_opcao == "1":
+                    criarAlerta(alertas)
+                elif sub_opcao == "2":
+                    cancelarAlerta(alertas)
+                else:
+                    print("Opção inválida.")
 
         elif usuario.tipo == "Agente":
             if opcao == "3":
@@ -176,6 +188,54 @@ def criarUsuario(lista_usuarios):
     except TypeError as e:
         print(f"\nErro de Atributo: Verifique se os campos extras estão corretos nas subclasses.")
         print(f"Detalhe técnico: {e}")
+
+def criarAlerta(lista_alerta):
+    print("\nEMITIR ALERTA GERAL:")
+    titulo = input("Título do Alerta: ")
+    msg = input("Mensagem da Emergência: ")
+    raio = float(input("Raio de alcance (km): "))
+    localizacao = None
+    
+    dados = {
+        "titulo": titulo,
+        "mensagem": msg,
+        "localizacao": localizacao,
+        "raio": raio
+    }
+    
+    novo_alerta = AlertaFactory.criar_alerta(**dados)
+    lista_alerta.append(novo_alerta)
+    print("Alerta disparado no sistema!")
+
+def cancelarAlerta(lista_alertas):
+    if not lista_alertas:
+        print("\nNão existem alertas ativos no sistema para cancelar.")
+        return
+
+    print("\nAlertas Ativos:")
+    for i, alerta in enumerate(lista_alertas):
+        print(f"ID: {i} | {alerta.titulo} ({alerta.horario})")
+
+    try:
+        escolha = int(input("\nDigite o ID do alerta que deseja cancelar: "))
+        
+        if 0 <= escolha < len(lista_alertas):
+            alerta_removido = lista_alertas.pop(escolha)
+            print(f"\nAlerta '{alerta_removido.titulo}' cancelado com sucesso!")
+        else:
+            print("\nID inválido.")
+            
+    except ValueError:
+        print("\nPor favor, digite um número válido.")
+
+def mostrarAlertas(lista_alertas): # Código de teste
+    if not lista_alertas:
+        return 
+        
+    print("\n🔔 --- ALERTAS RECENTES ---")
+    for alerta in lista_alertas:
+        print(alerta) 
+    print("---------------------------\n")
 
 if __name__ == "__main__":
     menuPrincipal()
