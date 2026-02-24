@@ -1,3 +1,4 @@
+from datetime import datetime
 from usuarios.Usuario import Usuario
 from Atendimento import Atendimento
 from ocorrencias.Ocorrencia import Ocorrencia
@@ -25,7 +26,7 @@ def menuPrincipal():
             Usuario.listarUsuarios(usuarios)
             usuario_logado = Usuario.Login(usuarios)
             if usuario_logado:
-                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes)
+                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes, alertas)
         elif opcao == "2":
             criarUsuario(usuarios)
         elif opcao == "0":
@@ -76,12 +77,12 @@ def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
             else:
                 print("Opção inválida, tente novamente.")
  
-def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes):
+def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes, lista_alerta):
     while True:
         print(f"\nUsuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
+        mostrarAlertas(usuario, lista_alerta)
         usuario.exibirMenu()
         opcao = input("Escolha uma opção: ")
-        mostrarAlertas(alertas)
         
         if opcao == "0":
             break
@@ -110,7 +111,6 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                     print(f"\nUsuário não encontrado")
 
         elif usuario.tipo == "Civil":
-            mostrarAlertas(alertas)
             if opcao == "3":
                 ocorrencia = Ocorrencia.abrirOcorrencia(usuarios, usuario)
                 if ocorrencia:
@@ -136,7 +136,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 print("2 - Cancelar Alerta")
                 sub_opcao = input("Escolha: ")
                 if sub_opcao == "1":
-                    criarAlerta(alertas)
+                    criarAlerta(alertas, ocorrencias)
                 elif sub_opcao == "2":
                     cancelarAlerta(alertas)
                 else:
@@ -163,12 +163,28 @@ def criarUsuario(lista_usuarios):
 
     tipo = input("Escolha o tipo: ")
 
+    nome = input("Nome: ")
+    cpf = input("CPF: ")
+    telefone = input("Telefone: ")
+    rua = input("Rua: ")
+    num = input("Número: ")
+    bairro = input("Bairro: ")
+    cidade = input("Cidade: ")
+    estado = input("Estado: ")
+    email = input("Email: ")
+    senha = input("Senha: ")
+
     dados = {
-        "nome": input("Nome: "),
-        "cpf": input("CPF: "),
-        "telefone": input("Telefone: "),
-        "email": input("Email: "),
-        "senha": input("Senha: ")
+        "nome": nome,
+        "cpf": cpf,
+        "telefone": telefone,
+        "rua": rua,
+        "num": num, 
+        "bairro": bairro,
+        "cidade": cidade,
+        "estado": estado,
+        "email": email,
+        "senha": senha
     }
 
     if tipo == "2":
@@ -189,23 +205,45 @@ def criarUsuario(lista_usuarios):
         print(f"\nErro de Atributo: Verifique se os campos extras estão corretos nas subclasses.")
         print(f"Detalhe técnico: {e}")
 
-def criarAlerta(lista_alerta):
-    print("\nEMITIR ALERTA GERAL:")
-    titulo = input("Título do Alerta: ")
-    msg = input("Mensagem da Emergência: ")
-    raio = float(input("Raio de alcance (km): "))
-    localizacao = None
-    
-    dados = {
-        "titulo": titulo,
-        "mensagem": msg,
-        "localizacao": localizacao,
-        "raio": raio
-    }
-    
-    novo_alerta = AlertaFactory.criar_alerta(**dados)
-    lista_alerta.append(novo_alerta)
-    print("Alerta disparado no sistema!")
+def criarAlerta(lista_alertas, lista_ocorrencias):
+    if not lista_ocorrencias:
+        print("\nNão há ocorrências registradas para gerar alertas.")
+        return
+
+    print("\nSELECIONE UMA OCORRÊNCIA PARA GERAR O ALERTA")
+    for i, oc in enumerate(lista_ocorrencias):
+        print(f"{i} - [{oc.tipo}] em {oc.bairro}, {oc.cidade}")
+
+    try:
+        idx = int(input("\nEscolha o número da ocorrência: "))
+        ocorrencia_base = lista_ocorrencias[idx]
+        
+        print(f"\nGerando alerta para: {ocorrencia_base.tipo} em {ocorrencia_base.rua}")
+        
+        titulo = input("Título do Alerta (Ex: Perigo de Alagamento): ")
+        msg = input("Mensagem de orientação: ")
+        
+        print("\nAlcance do Alerta:")
+        print("1 - Cidade Toda | 2 - Bairro | 3 - Rua")
+        op_escopo = input("Escolha o alcance: ")
+        
+        escopos = {"1": "cidade", "2": "bairro", "3": "rua"}
+        escopo_final = escopos.get(op_escopo, "cidade")
+
+        dados = {
+            "titulo": titulo,
+            "mensagem": msg,
+            "ocorrencia": ocorrencia_base,
+            "escopo": escopo_final,
+            "horario": datetime.now().strftime("%H:%M:%S")
+        }
+
+        novo_alerta = AlertaFactory.criar_alerta(**dados)
+        lista_alertas.append(novo_alerta)
+        print("\n✅ Alerta disparado com sucesso baseado na ocorrência selecionada!")
+
+    except (ValueError, IndexError):
+        print("\n❌ Seleção inválida. Operação cancelada.")
 
 def cancelarAlerta(lista_alertas):
     if not lista_alertas:
@@ -228,14 +266,37 @@ def cancelarAlerta(lista_alertas):
     except ValueError:
         print("\nPor favor, digite um número válido.")
 
-def mostrarAlertas(lista_alertas): # Código de teste
-    if not lista_alertas:
-        return 
-        
-    print("\n🔔 --- ALERTAS RECENTES ---")
-    for alerta in lista_alertas:
-        print(alerta) 
-    print("---------------------------\n")
+def mostrarAlertas(usuario_logado, lista_alerta):
+    print(f"\n🔔 --- CENTRAL DE ALERTAS: {usuario_logado.cidade.upper()} ---")
+    encontrou = False
+
+    for alerta in lista_alerta :
+        oc = alerta.ocorrencia 
+        mostrar = False
+
+        if alerta.escopo == "cidade":
+            if oc.cidade.lower() == usuario_logado.cidade.lower():
+                mostrar = True
+
+        elif alerta.escopo == "bairro":
+            if (oc.cidade.lower() == usuario_logado.cidade.lower() and 
+                oc.bairro.lower() == usuario_logado.bairro.lower()):
+                mostrar = True
+
+        elif alerta.escopo == "rua":
+            if (oc.cidade.lower() == usuario_logado.cidade.lower() and 
+                oc.bairro.lower() == usuario_logado.bairro.lower() and
+                oc.rua.lower() == usuario_logado.rua.lower()):
+                mostrar = True
+
+        if mostrar:
+            print("-" * 40)
+            print(alerta) 
+            encontrou = True
+
+    if not encontrou:
+        print("Nenhum alerta no momento\n")
+    print("-" * 40)
 
 if __name__ == "__main__":
     menuPrincipal()

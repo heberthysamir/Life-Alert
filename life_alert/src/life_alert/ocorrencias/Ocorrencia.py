@@ -5,7 +5,7 @@ from usuarios.UsuarioAgente import Agente
 
 class Ocorrencia:
     _id_auto = 1
-    def __init__(self, atendente, agente, civil, dataHora, status, descricao, local, gravidade, tipo, qtdAfetados):
+    def __init__(self, atendente, agente, civil, dataHora, status, descricao, rua, bairro, cidade, estado, gravidade, tipo, qtdAfetados):
         self.id = Ocorrencia._id_auto
         self.atendente = atendente
         self.agente = agente
@@ -13,7 +13,10 @@ class Ocorrencia:
         self.dataHora = dataHora
         self.status = status
         self.descricao = descricao
-        self.local = local
+        self.rua = rua
+        self.bairro = bairro
+        self.cidade = cidade
+        self.estado = estado
         self.gravidade = gravidade
         self.tipo = tipo
         self.qtdAfetados = qtdAfetados
@@ -50,7 +53,10 @@ class Ocorrencia:
         dataHora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         status = "Aberta"
         descricao = input("Descrição da ocorrência: ")
-        local = input("Local da ocorrência: ")
+        rua = input("Rua: ")
+        bairro = input("Bairro: ")
+        cidade = input("Cidade: ")
+        estado = input("Estado: ")
         gravidade = input("Gravidade (baixa/média/alta): ")
         qtdAfetados = int(input("Quantidade de pessoas afetadas: "))
 
@@ -60,13 +66,13 @@ class Ocorrencia:
             tipoCrime = input("Tipo de crime: ")
             qtdCriminosos = int(input("Quantidade de criminosos: "))
             descricaoSuspeito = input("Descrição do suspeito: ")
-            ocorrencia = OcorrenciaPolicial(tipoCrime, qtdCriminosos, descricaoSuspeito, atendente, agente, civil, dataHora, status, descricao, local, gravidade, "Policial", qtdAfetados)
+            ocorrencia = OcorrenciaPolicial(tipoCrime, qtdCriminosos, descricaoSuspeito, atendente, agente, civil, dataHora, status, descricao, rua, bairro, cidade, estado, gravidade, "Policial", qtdAfetados)
         elif tipo == 2:
             perfilMedico = input("Perfil médico: ")
             sintomas = input("Sintomas: ")
-            ocorrencia = OcorrenciaMedica(perfilMedico, sintomas, atendente, agente, civil, dataHora, status, descricao, local, gravidade, "Médica", qtdAfetados)
+            ocorrencia = OcorrenciaMedica(perfilMedico, sintomas, atendente, agente, civil, dataHora, status, descricao, rua, bairro, cidade, estado, gravidade, "Médica", qtdAfetados)
         else:
-            ocorrencia = Ocorrencia(atendente, agente, civil, dataHora, None, descricao, local, gravidade, "Desconhecido", qtdAfetados)
+            ocorrencia = Ocorrencia(atendente, agente, civil, dataHora, None, descricao, rua, bairro, cidade, estado, gravidade, "Desconhecido", qtdAfetados)
             return ocorrencia
     
         if ocorrencia:
