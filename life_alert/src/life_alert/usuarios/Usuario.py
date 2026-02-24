@@ -1,18 +1,23 @@
 
 class Usuario:
     _id_auto = 1
-    def __init__(self, nome, cpf, telefone, email, senha, tipo):
+    def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, tipo):
         self.id = Usuario._id_auto
         Usuario._id_auto += 1
         self.nome = nome
         self.cpf = cpf
         self.telefone = telefone
+        self.rua = rua
+        self.num = num
+        self.bairro = bairro
+        self.cidade = cidade
+        self.estado = estado
         self.email = email
         self.senha = senha
         self.tipo = tipo
 
     def __str__(self):
-        return f"[{self.id}] {self.nome} - {self.tipo}"
+        return f"[{self.id}] {self.nome} - {self.tipo}."
     
     def exibirMenu(self):
         print("0 - Logout")
