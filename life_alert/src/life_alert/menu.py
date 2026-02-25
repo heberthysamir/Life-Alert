@@ -5,6 +5,7 @@ from ocorrencias.Ocorrencia import Ocorrencia
 from EquipeResgate import EquipeResgate
 from application.usuariosFactory import UsuarioFactory
 from application.alertasFactory import AlertaFactory
+from application.atendimentoService import AtendimentoService
 
 usuarios = []
 ocorrencias = []
@@ -115,6 +116,15 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 ocorrencia = Ocorrencia.abrirOcorrencia(usuarios, usuario)
                 if ocorrencia:
                     lista_ocorrencias.append(ocorrencia)
+                atendente = AtendimentoService.designarAtendente(ocorrencia, usuarios, lista_atendimentos)
+                if atendente:
+                    novo_atendimento = Atendimento(atendente=atendente, ocorrencia=ocorrencia)
+                    lista_atendimentos.append(novo_atendimento)
+                    ocorrencia.status = "Em Atendimento"
+                    print(f"Ocorrência enviada para o atendente: {atendente.nome}")
+                else:
+                    print("Ocorrência registrada. Aguardando atendente disponível na sua cidade.")
+
             elif opcao == "4":
                 print("\nMinhas Ocorrências:")
                 minhas_ocorrencias = [o for o in lista_ocorrencias if o.civil == usuario]
@@ -126,9 +136,17 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
 
         elif usuario.tipo == "Atendente":
             if opcao == "3":
-                atendimento = Atendimento.iniciarAtendimento(usuarios, lista_ocorrencias, usuario)
-                if atendimento:
-                    lista_atendimentos.append(atendimento)
+                meus_atendimentos = [a for a in lista_atendimentos if a.atendente == usuario]
+                if not meus_atendimentos:
+                    print("\nVocê não possui atendimentos designados.")
+                else:
+                    print("\nSEUS ATENDIMENTOS:")
+                    for i, at in enumerate(meus_atendimentos):
+                        print(f"[{i}] {at}")
+                    escolha = input("\nSelecione um ID para atualizar ou 's' para sair: ")
+                    if escolha.isdigit() and int(escolha) < len(meus_atendimentos):
+                        meus_atendimentos[int(escolha)].atualizarAtendimento()
+
             elif opcao == "4":
                 Atendimento.encaminharResgate(lista_equipes, lista_ocorrencias)
             elif opcao == "5":
