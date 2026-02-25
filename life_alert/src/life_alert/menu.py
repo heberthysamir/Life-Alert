@@ -148,7 +148,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                         meus_atendimentos[int(escolha)].atualizarAtendimento()
 
             elif opcao == "4":
-                print("\nEncaminhar para Resgate")
+                Atendimento.encaminharResgate(lista_equipes, lista_ocorrencias)
             elif opcao == "5":
                 print("1 - Criar Alerta")
                 print("2 - Cancelar Alerta")
