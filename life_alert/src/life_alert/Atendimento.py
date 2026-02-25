@@ -2,15 +2,21 @@ import datetime
 
 class Atendimento:
     _id_auto = 1
-    def __init__(self, atendente, civil, grauUrgencia, horaInicio, horaFinal, ocorrencia):
+    def __init__(self, atendente, ocorrencia, civil=None, grauUrgencia="Não definido", horaInicio=None, horaFinal=None):
         self.id = Atendimento._id_auto
         Atendimento._id_auto += 1
         self.atendente = atendente
-        self.civil = civil
-        self.grauUrgencia = grauUrgencia
-        self.horaInicio = horaInicio
-        self.horaFinal = horaFinal
         self.ocorrencia = ocorrencia
+        self.civil = civil if civil else ocorrencia.civil
+        self.grauUrgencia = grauUrgencia
+        if horaInicio is None:
+            self.horaInicio = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            self.horaInicio = horaInicio     
+        self.horaFinal = horaFinal
+
+    def __str__(self):
+        return f"Atendimento #{self.id} | Status: {self.ocorrencia.status} | Urgência: {self.grauUrgencia} | Local: {self.ocorrencia.bairro}"
 
     @staticmethod
     def iniciarAtendimento(lista_usuarios, lista_ocorrencia, usuario_logado):
@@ -43,6 +49,15 @@ class Atendimento:
 
         print(f"\nAtendimento iniciado para {ocorrencia.civil} com grau de urgência {grauUrgencia}.")
         return atendimento
+    
+    def atualizarAtendimento(self):
+        print(f"\nATUALIZANDO ATENDIMENTO:{self.id}")
+        print("\nDETALHES DA OCORRÊNCIA:")
+        print(self.ocorrencia)
+        print(f"Ocorrência: {self.ocorrencia.tipo} | Descrição: {self.ocorrencia.descricao}")
+        novo_grau = input("Defina o grau de urgência (baixa/média/alta): ")
+        self.grauUrgencia = novo_grau
+        print("✅ Dados do atendimento atualizados com sucesso!")
 
     def encaminharResgate():
         pass
