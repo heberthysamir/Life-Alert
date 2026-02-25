@@ -22,14 +22,14 @@ life_alert/
 |   |   ├── OcorrenciaMedica.py
 |   |   ├── OcorrenciaPolicial.py
 |   |   └── __init__.py
-|
+|   |
 |   ├── usuarios/
 |   |   ├── Usuario.py
 |   |   ├── UsuarioAgente.py
 |   |   ├── UsuarioAtendente.py
 |   |   ├── UsuarioCivil.py
 |   |   └── __init__.py
-|
+|   |
 |   ├── Alerta.py
 |   ├── Atendimento.py
 |   ├── EquipeResgate.py
