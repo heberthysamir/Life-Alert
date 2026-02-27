@@ -3,6 +3,7 @@ from usuarios.Usuario import Usuario
 from Atendimento import Atendimento
 from ocorrencias.Ocorrencia import Ocorrencia
 from EquipeResgate import EquipeResgate
+from PerfilMedico import PerfilMedico
 from application.usuariosFactory import UsuarioFactory
 from application.alertasFactory import AlertaFactory
 from application.atendimentoService import AtendimentoService
@@ -133,6 +134,38 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 else:
                     for o in minhas_ocorrencias:
                         print(o)
+
+            elif opcao == "5":
+                while True:
+                    print("\nGerenciamento do perfil médico:")
+                    print("0 - Voltar")
+                    print("1 - Visualizar perfil")
+                    print("2 - Cadastrar perfil")
+                    print("3 - Atualizar perfil")
+
+                    sub_opcao = input("\nEscolha uma opção: ")
+
+                    if sub_opcao == "1":
+                        if usuario.perfil_medico is None:
+                            print("\nVocê ainda não possui um perfil cadastrado.")
+                        else:
+                            usuario.perfil_medico.exibirInformacoes()
+
+                    elif sub_opcao == "2":
+                        PerfilMedico.cadastrarPerfil(usuario)
+
+                    elif sub_opcao == "3":
+                        if usuario.perfil_medico is None:
+                            print("\nVocê ainda não possui um perfil cadastrado.")
+                        else:
+                            usuario.perfil_medico.atualizarPerfil()
+
+                    elif sub_opcao == "0":
+                        break
+
+                    else:
+                        print("Opção inválida.")
+
 
         elif usuario.tipo == "Atendente":
             if opcao == "3":
