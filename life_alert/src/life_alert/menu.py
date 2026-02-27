@@ -1,5 +1,6 @@
 from datetime import datetime
 from usuarios.Usuario import Usuario
+from usuarios.UsuarioAgente import UsuarioAgente
 from Atendimento import Atendimento
 from ocorrencias.Ocorrencia import Ocorrencia
 from EquipeResgate import EquipeResgate
@@ -14,6 +15,7 @@ atendimentos = []
 equipes = []
 agentes = []
 alertas = []
+vitimas = []
 
 def menuPrincipal():
     while True:
@@ -28,7 +30,7 @@ def menuPrincipal():
             Usuario.listarUsuarios(usuarios)
             usuario_logado = Usuario.Login(usuarios)
             if usuario_logado:
-                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes, alertas)
+                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes, alertas, vitimas)
         elif opcao == "2":
             criarUsuario(usuarios)
         elif opcao == "0":
@@ -79,7 +81,7 @@ def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
             else:
                 print("Opção inválida, tente novamente.")
  
-def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes, lista_alerta):
+def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes, lista_alerta, lista_vitimas):
     while True:
         print(f"\nUsuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
         mostrarAlertas(usuario, lista_alerta)
@@ -178,6 +180,11 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                         print(f"[{i}] {at}")
                     escolha = input("\nSelecione um ID para atualizar ou 's' para sair: ")
                     if escolha.isdigit() and int(escolha) < len(meus_atendimentos):
+                        atendimento_selecionado = meus_atendimentos[int(escolha)]
+                        usuario.analisarOcorrencia(atendimento_selecionado.ocorrencia)
+                        atualizar = input("\nDeseja atualizar o status deste atendimento? (sim/não): ")
+                        if atualizar.lower() == "sim":
+                            atendimento_selecionado.atualizarAtendimento()
                         meus_atendimentos[int(escolha)].atualizarAtendimento()
 
             elif opcao == "4":
@@ -187,7 +194,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 print("2 - Cancelar Alerta")
                 sub_opcao = input("Escolha: ")
                 if sub_opcao == "1":
-                    criarAlerta(alertas, ocorrencias)
+                    criarAlerta(alertas, lista_ocorrencias)
                 elif sub_opcao == "2":
                     cancelarAlerta(alertas)
                 else:
@@ -196,8 +203,27 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
         elif usuario.tipo == "Agente":
             if opcao == "3":
                 print("\nGerenciar Resgate em Andamento")
+                if not lista_vitimas:
+                    print("nenhuma vítima cadastrada no sistema.")
+                else:
+                    print("Vítimas cadastradas:")
+                    for i, v in enumerate(lista_vitimas):
+                        oc_id = getattr(v.ocorrencia, 'id', 'Desconhecida') 
+                        print(f"[{i}] {v.nome} | Idade: {v.idade} | Situação: {v.situacao} | Ocorrência: {oc_id}")
+                    
+                    escolha = input("\nDigite o número da vítima para atualizar a situação (ou 's' para sair): ")
+                    
+                    if escolha.isdigit() and int(escolha) < len(lista_vitimas):
+                        vitima_selecionada = lista_vitimas[int(escolha)]
+                        vitima_selecionada.atualizarSituacao()
+                    elif escolha.lower() != 's':
+                        print("Opção inválida.")
             elif opcao == "4":
-                print("\nCadastrar Vítima")
+                nova_vitima = usuario.cadastrarVitima(lista_ocorrencias)
+                if nova_vitima:
+                    print(f"\nVítima '{nova_vitima.nome}' cadastrada.")
+                lista_vitimas.append(nova_vitima)
+                    
             elif usuario.cargo.lower() == "lider":
                 if opcao == "5":
                     EquipeResgate.cadastrarEquipe(lista_equipes, usuario)
