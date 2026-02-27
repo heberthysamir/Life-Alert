@@ -1,4 +1,5 @@
 from .Usuario import Usuario
+from ocorrencias import Ocorrencia
 
 class Atendente(Usuario):
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, turno):
@@ -11,8 +12,13 @@ class Atendente(Usuario):
         print("4 - Encaminhar para Resgate")
         print("5 - Emitir Alerta Geral")
 
-    def analisarOcorrencia():
-        pass
+    def analisarOcorrencia(self, ocorrencia):
+        print(f"\nAnalisando ocorrência: {ocorrencia}")
+        print("Vítimas envolvidas:")
+        for vitima in ocorrencia.vitimas:
+            print(f" - {vitima.nome}")
+            print(f"   Idade: {vitima.idade}")
+            print(f"   Situação: {vitima.situacao}")
 
     def encaminharResgate():
         pass
