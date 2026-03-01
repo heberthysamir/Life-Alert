@@ -1,4 +1,4 @@
-from Vitima import Vitima
+from domain.Vitima import Vitima
 
 class VitimaFactory:
     @staticmethod

@@ -1,5 +1,4 @@
 from .Usuario import Usuario
-from ocorrencias import Ocorrencia
 
 class Atendente(Usuario):
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, turno):

@@ -1,4 +1,4 @@
-from PerfilMedico import PerfilMedico
+from domain.PerfilMedico import PerfilMedico
 
 class PerfilMedicoFactory:
     @staticmethod
