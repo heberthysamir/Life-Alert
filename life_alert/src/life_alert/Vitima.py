@@ -5,12 +5,12 @@ class Vitima:
         self.situacao = situacao
         self.ocorrencia = ocorrencia
 
-    def atualizarSituacao(self):
-        print(f"\nSituação atual de {self.nome}: {self.situacao}")
-        nova_situacao = input("Informe a nova situação (ou 'Enter' para cancelar): ")
-        
+    def atualizar_situacao(self, nova_situacao):
         if nova_situacao.strip():
             self.situacao = nova_situacao
-            print(f"Situação de {self.nome} atualizada para: '{self.situacao}'!")
-        else:
-            print("Atualização cancelada.")
+            return True
+        return False
+
+    def __str__(self):
+        oc_id = getattr(self.ocorrencia, 'id', 'N/A')
+        return f"Vítima: {self.nome} | Idade: {self.idade} | Situação: {self.situacao} | Ocorrência #{oc_id}"
