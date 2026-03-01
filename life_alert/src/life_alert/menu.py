@@ -9,6 +9,7 @@ from application.ocorrenciaFactory import OcorrenciaFactory
 from application.perfilMedicoFactory import PerfilMedicoFactory
 from application.vitimaFactory import VitimaFactory
 from application.atendimentoService import AtendimentoService
+from application.relatorioService import RelatorioService
 
 usuarios = []
 ocorrencias = []
@@ -259,7 +260,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 elif opcao == "6":
                     menuEquipe(lista_equipes, usuarios, usuario)
                 elif opcao == "7":
-                    EquipeResgate.listarEquipes(lista_equipes)
+                    menuRelatorio(lista_ocorrencias)
 
 def criarUsuario(lista_usuarios):
     print("\nCRIAR NOVO USUÁRIO")
@@ -520,6 +521,18 @@ def cadastrarVitimaMenu(lista_ocorrencias):
     except (ValueError, IndexError):
         print("Seleção inválida.")
         return None
+
+def menuRelatorio(lista_ocorrencias):
+    print("\nGERAR RELATÓRio:")
+    data_i = input("Data Inicial (DD/MM/AAAA): ")
+    data_f = input("Data Final (DD/MM/AAAA): ")
+    
+    try:
+        relatorio = RelatorioService.gerar_relatorio_por_periodo(lista_ocorrencias, data_i, data_f)
+        relatorio.exibir()
+        
+    except ValueError:
+        print("❌ Formato de data inválido. Use DD/MM/AAAA.")
 
 if __name__ == "__main__":
     menuPrincipal()
