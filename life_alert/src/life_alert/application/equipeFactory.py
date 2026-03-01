@@ -1,4 +1,4 @@
-from EquipeResgate import EquipeResgate
+from domain.EquipeResgate import EquipeResgate
 
 class EquipeFactory:
     @staticmethod

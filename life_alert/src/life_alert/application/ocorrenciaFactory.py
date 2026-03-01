@@ -1,6 +1,6 @@
-from ocorrencias.Ocorrencia import Ocorrencia
-from ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
-from ocorrencias.OcorrenciaMedica import OcorrenciaMedica
+from domain.ocorrencias.Ocorrencia import Ocorrencia
+from domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
+from domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
 
 class OcorrenciaFactory:
     @staticmethod

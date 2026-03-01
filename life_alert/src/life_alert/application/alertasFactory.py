@@ -1,4 +1,4 @@
-from Alerta import Alerta
+from domain.Alerta import Alerta
 
 class AlertaFactory:
     @staticmethod

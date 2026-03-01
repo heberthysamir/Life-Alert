@@ -1,5 +1,5 @@
 from .Usuario import Usuario
-from Vitima import Vitima
+from domain.Vitima import Vitima
 
 class Agente(Usuario):
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, cargo, status):
