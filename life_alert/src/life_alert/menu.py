@@ -2,6 +2,7 @@ from datetime import datetime
 from domain.usuarios.Usuario import Usuario
 from domain.Atendimento import Atendimento
 from domain.EquipeResgate import EquipeResgate
+from domain.Resgate import Resgate
 from application.usuariosFactory import UsuarioFactory
 from application.alertasFactory import AlertaFactory
 from application.equipeFactory import EquipeFactory
@@ -18,6 +19,7 @@ equipes = []
 agentes = []
 alertas = []
 vitimas = []
+resgates = []
 
 def menuPrincipal():
     while True:
@@ -261,6 +263,8 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                     menuEquipe(lista_equipes, usuarios, usuario)
                 elif opcao == "7":
                     menuRelatorio(lista_ocorrencias)
+                elif opcao == "8":
+                    gerenciarResgates(usuario, lista_ocorrencias, atendimentos)
 
 def criarUsuario(lista_usuarios):
     print("\nCRIAR NOVO USUÁRIO")
@@ -533,6 +537,67 @@ def menuRelatorio(lista_ocorrencias):
         
     except ValueError:
         print("❌ Formato de data inválido. Use DD/MM/AAAA.")
+
+
+def gerenciarResgates(usuario_logado, lista_ocorrencias, lista_resgates):
+    print(f"--- Gerenciando resgates - Líder: {usuario_logado.nome} ---")
+    
+    minhasOcorrencias = [
+        o for o in lista_ocorrencias 
+        if o.equipe and usuario_logado in o.equipe.agentes and usuario_logado.cargo.lower() == "lider"
+    ]
+
+    if not minhasOcorrencias:
+        print("Você não possui ocorrências em andamento sob sua liderança.")
+        return
+
+    for i, oc in enumerate(minhasOcorrencias):
+        print(f"{i} - Tipo: {oc.tipo}, Status: {oc.status}")
+
+    try: 
+        index = int(input("Selecione o índice da ocorrência para gerenciar (ou 's' para voltar): "))
+        ocSel = minhasOcorrencias[index]
+
+        while True:
+            print(f"\nGerenciando Resgate - Ocorrencia #{ocSel.id}")
+            print("1 - Iniciar Resgate")
+            print("2 - Adicionar Resgatados")
+            print("3 - Concluir Resgate")
+            print("0 - Voltar")
+
+            cmd = input("Escolha uma opção: ")
+
+            if cmd == "1":
+                if any(r.ocorrencia == ocSel for r in lista_resgates):
+                    print("❌ Resgate já iniciado para esta ocorrência.")
+                else:
+                    desc = input("Descrição do plano de resgate: ")
+                    newResgate = Resgate(ocSel.id, ocSel, desc)
+                    lista_resgates.append(newResgate)
+                    ocSel.status = "Em Resgate"
+                    print(f"✅ Resgate iniciado para Ocorrência #{ocSel.id}, às {newResgate.dataInicio}.")
+            
+            elif cmd == "2":
+                resgateAtual = next((r for r in lista_resgates if r.ocorrencia == ocSel), None) 
+                if resgateAtual:
+                    qtd = int(input("Informe a quantidade de resgatados no momento: "))
+                    print(resgateAtual.adicionarVitima(qtd))
+                else:
+                    print("❌ Nenhum resgate iniciado para esta ocorrência.")
+
+            elif cmd == "3":
+                resgateAtual = next((r for r in lista_resgates if r.ocorrencia == ocSel), None)
+                if resgateAtual:
+                    print(resgateAtual.concluirResgate())
+                else:
+                    print("❌ Nenhum resgate iniciado para esta ocorrência.")
+                
+            elif cmd == "0":
+                break
+    except (ValueError, IndexError):
+        print("Seleção inválida. Retornando ao menu principal.")
+
+
 
 if __name__ == "__main__":
     menuPrincipal()
