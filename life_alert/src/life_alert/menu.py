@@ -528,7 +528,7 @@ def menuRelatorio(lista_ocorrencias):
     data_f = input("Data Final (DD/MM/AAAA): ")
     
     try:
-        relatorio = RelatorioService.gerar_relatorio_por_periodo(lista_ocorrencias, data_i, data_f)
+        relatorio = RelatorioService.gerar_estatisticas(lista_ocorrencias, data_i, data_f)
         relatorio.exibir()
         
     except ValueError:

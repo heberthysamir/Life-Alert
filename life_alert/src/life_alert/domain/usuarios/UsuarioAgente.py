@@ -14,6 +14,7 @@ class Agente(Usuario):
         if self.cargo.lower() == "lider":
             print("5 - Cadastrar Equipe")
             print("6 - Gerenciar Membros")
+            print("7 - Relatório")
 
     def cadastrarVitima(self, lista_ocorrencias):
         print("\nCadastro de Vítima:\n")
