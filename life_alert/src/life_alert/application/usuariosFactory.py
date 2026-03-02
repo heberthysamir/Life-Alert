@@ -1,6 +1,6 @@
-from usuarios.UsuarioCivil import Civil
-from usuarios.UsuarioAtendente import Atendente
-from usuarios.UsuarioAgente import Agente
+from domain.usuarios.UsuarioCivil import Civil
+from domain.usuarios.UsuarioAtendente import Atendente
+from domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioFactory:
 
