@@ -15,7 +15,8 @@ class Agente(Usuario):
             print("5 - Cadastrar Equipe")
             print("6 - Gerenciar Membros")
             print("7 - Relatório")
-
+            print("8 - Gerenciar Resgates")
+            
     def cadastrarVitima(self, lista_ocorrencias):
         print("\nCadastro de Vítima:\n")
         nome = input("Nome: ")
@@ -33,7 +34,7 @@ class Agente(Usuario):
         print(f"Vítima '{nome}' cadastrada na ocorrência ID {ocorrencia_id}.")
 
         return nova_vitima
-
+    
     def atualizarOcorrencia():
         pass
 
