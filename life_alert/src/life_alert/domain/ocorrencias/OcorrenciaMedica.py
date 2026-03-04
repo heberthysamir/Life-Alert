@@ -28,6 +28,14 @@ class OcorrenciaMedica(Ocorrencia):
             else:
                 print(f"    Perfil Médico: Não registrado.")
 
+    def registrarPerfilMedico(self, vitima, perfilMedico):
+        if vitima not in self.prontuariosVitimas:
+            self.prontuariosVitimas[vitima] = {"sintomas": "Não informados", "perfilMedico": perfilMedico}
+        else:
+            self.prontuariosVitimas[vitima]["perfilMedico"] = perfilMedico
+        
+        print(f"Perfil Médico vinculado à vítima {vitima.nome} com sucesso!")
+
     def enviarPerfilmedico(self):
         perfilMedico = input("Digite o perfil médico do paciente: ")
         self.perfilMedico = perfilMedico
