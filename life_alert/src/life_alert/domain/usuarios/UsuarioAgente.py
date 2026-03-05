@@ -7,33 +7,20 @@ class Agente(Usuario):
         self.cargo = cargo
         self.status = status
     
-    def exibirMenu(self):
-        super().exibirMenu()
-        print("3 - Gerenciar Resgate em Andamento")
-        print("4 - Cadastrar Vítima")
-        if self.cargo.lower() == "lider":
-            print("5 - Cadastrar Equipe")
-            print("6 - Gerenciar Membros")
-            print("7 - Relatório")
-            print("8 - Gerenciar Resgates")
-            
-    def cadastrarVitima(self, lista_ocorrencias):
-        print("\nCadastro de Vítima:\n")
-        nome = input("Nome: ")
-        idade = input("Idade: ")
-        situacao = input("Situação: ")
-
-        ocorrencia_id = input("ID da Ocorrência relacionada: ")
-        ocorrencia = next((o for o in lista_ocorrencias if str(o.id) == ocorrencia_id), None)
-        if not ocorrencia:
-            print("Ocorrência não encontrada.")
-            return None
+    def obter_funcionalidades(self):
+        acoes = super().obter_funcionalidades() # Pega as ações de atualizar/excluir
+        acoes.extend([
+            ("👥 Gerenciar Vítimas", lambda container: self.gui_ref.tela_gerenciar_vitimas(container)),
+            ("🚩 Registrar Vítima", lambda container: self.gui_ref.tela_cadastrar_vitima(container))
+        ])
         
-        nova_vitima = Vitima(nome, idade, situacao, ocorrencia)
-        ocorrencia.vitimas.append(nova_vitima)
-        print(f"Vítima '{nome}' cadastrada na ocorrência ID {ocorrencia_id}.")
-
-        return nova_vitima
+        # Polimorfismo baseado no cargo
+        if hasattr(self, 'cargo') and self.cargo.lower() == "lider":
+            acoes.append(("🛠️ Criar Equipe", lambda container: self.gui_ref.tela_criar_equipe(container)))
+            acoes.append(("📋 Menu Equipes", lambda container: self.gui_ref.tela_menu_equipe(container)))
+            acoes.append(("📊 Relatórios", lambda container: self.gui_ref.tela_relatorios(container)))
+            
+        return acoes
     
     def atualizarOcorrencia():
         pass

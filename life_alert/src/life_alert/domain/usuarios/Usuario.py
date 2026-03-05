@@ -19,10 +19,12 @@ class Usuario:
     def __str__(self):
         return f"[{self.id}] {self.nome} - {self.tipo}."
     
-    def exibirMenu(self):
-        print("0 - Logout")
-        print("1 - Atualizar dados")
-        print("2 - Apagar conta")
+    def obter_funcionalidades(self):
+        # Ações que TODO usuário possui
+        return [
+            ("👤 Atualizar Dados", lambda container: self.gui_ref.tela_atualizar_dados(container)),
+            ("🗑️ Excluir Conta", lambda container: self.gui_ref.tela_excluir_conta(container))
+        ]
     
     @staticmethod
     def listarUsuarios(lista_usuarios):
