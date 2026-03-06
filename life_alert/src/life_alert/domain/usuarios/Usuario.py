@@ -1,4 +1,3 @@
-
 class Usuario:
     _id_auto = 1
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, tipo):
@@ -20,41 +19,36 @@ class Usuario:
         return f"[{self.id}] {self.nome} - {self.tipo}."
     
     def obter_funcionalidades(self):
-        # Ações que TODO usuário possui
         return [
             ("👤 Atualizar Dados", lambda container: self.gui_ref.tela_atualizar_dados(container)),
             ("🗑️ Excluir Conta", lambda container: self.gui_ref.tela_excluir_conta(container))
         ]
-    
-    @staticmethod
-    def listarUsuarios(lista_usuarios):
-        print("\nUsuários Cadastrados:")
-        if not lista_usuarios:
-            print("Nenhum usuário cadastrado.")
-            return
-        for u in lista_usuarios:
-            print(u)
 
     @staticmethod
-    def Login(lista_usuarios):
-        print("\nLogin Life Alert:")
+    def Login(lista_usuarios, email, senha):
+        """
+        Recebe a lista e as credenciais vindas da GUI e 
+        retorna o objeto usuário ou None.
+        """
         if not lista_usuarios:
-            print("Nenhum usuário cadastrado.")
-            return
-        email = input("E-mail: ")
-        senha = input("Senha: ")
+            return None
+            
         for u in lista_usuarios:
             if u.email == email and u.senha == senha:
-                print(f"\nBem-vindo, {u.nome}! Login realizado como {u.tipo}.")
                 return u 
-        print("\nErro: E-mail ou senha incorretos.")
         return None
     
-    def atualizarUsuario(self, novo_nome=None, novo_telefone=None, novo_email=None, nova_senha=None):
+    def atualizarUsuario(self, novo_nome=None, novo_telefone=None, novo_email=None, nova_senha=None, nova_rua=None, novo_num=None, novo_bairro=None, nova_cidade=None, novo_estado=None):
         if novo_nome: self.nome = novo_nome
         if novo_telefone: self.telefone = novo_telefone
         if novo_email: self.email = novo_email
         if nova_senha: self.senha = nova_senha
+
+        if nova_rua: self.rua = nova_rua
+        if novo_num: self.num = novo_num
+        if novo_bairro: self.bairro = novo_bairro
+        if nova_cidade: self.cidade = nova_cidade
+        if novo_estado: self.estado = novo_estado
 
     def excluirUsuario(self, lista_usuarios):
         if self in lista_usuarios:

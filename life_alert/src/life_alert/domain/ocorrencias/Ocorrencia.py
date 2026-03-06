@@ -1,7 +1,8 @@
 class Ocorrencia:
     _id_auto = 1
-    def __init__(self, atendente, agente, civil, dataHora, status, descricao, rua, bairro, cidade, estado, complemento, gravidade, tipo, qtdAfetados, equipe):
+    def __init__(self, atendente, agente, civil, dataHora, status, descricao, rua, bairro, cidade, estado, complemento, gravidade, tipo, qtdAfetados,**kwargs):
         self.id = Ocorrencia._id_auto
+        Ocorrencia._id_auto += 1
         self.atendente = atendente
         self.agente = agente
         self.civil = civil

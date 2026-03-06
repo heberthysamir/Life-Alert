@@ -1,10 +1,11 @@
 from .Ocorrencia import Ocorrencia
 
 class OcorrenciaMedica(Ocorrencia):
-    def __init__(self, *args, **kwargs):
-        self.sintomasGerais = kwargs.pop('sintomas', "Não especificado")
-        super().__init__(*args, **kwargs)
-        self.prontuariosVitimas = {}
+    def __init__(self, perfilMedico=None, sintomas=None, prontuariosVitimas=None , **kwargs):
+        super().__init__(**kwargs) 
+        self.perfilMedico = perfilMedico
+        self.sintomas = sintomas
+        self.prontuariosVitimas = prontuariosVitimas
 
     def registrarSintomasVitima(self, vitima, sintomas):
         if vitima not in self.prontuariosVitimas:
