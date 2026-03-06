@@ -10,6 +10,7 @@ class Civil(Usuario):
         acoes.extend([
             ("🚨 Nova Ocorrência", lambda container: self.gui_ref.tela_criar_ocorrencia(container)),
             ("📋 Minhas Ocorrências", lambda container: self.gui_ref.tela_listar_ocorrencias(container)),
-            ("🏥 Perfil Médico", lambda container: self.gui_ref.tela_perfil_medico(container))
+            ("🏥 Perfil Médico", lambda container: self.gui_ref.tela_perfil_medico(container)),
+            ("🔔 Ver Alertas", lambda container: self.gui_ref.tela_central_alertas(container))
         ])
         return acoes

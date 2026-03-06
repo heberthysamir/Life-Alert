@@ -21,28 +21,6 @@ alertas = []
 vitimas = []
 resgates = []
 
-def menuPrincipal():
-    while True:
-        print("\nLIFE ALERT")
-        print("1 - Fazer login")
-        print("2 - Criar usuário")
-        print("0 - Sair")
-
-        opcao = input("Escolha: ")
-
-        if opcao == "1":
-            Usuario.listarUsuarios(usuarios)
-            usuario_logado = Usuario.Login(usuarios)
-            if usuario_logado:
-                menuUsuario(usuario_logado, usuarios, ocorrencias, atendimentos, equipes, alertas, vitimas)
-        elif opcao == "2":
-            criarUsuario(usuarios)
-        elif opcao == "0":
-            print("Encerrando sistema...")
-            break
-        else:
-            print("Opção inválida")
-
 def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
         print(f"\n --- Gerenciar equipes (Líder: {usuario_logado.nome}) ---\n")
 
@@ -124,7 +102,6 @@ def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
 def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes, lista_alerta, lista_vitimas):
     while True:
         print(f"\nUsuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
-        mostrarAlertas(usuario, lista_alerta)
         usuario.exibirMenu()
         opcao = input("Escolha uma opção: ")
         
@@ -154,20 +131,6 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 else:
                     print(f"\nUsuário não encontrado")
 
-        elif usuario.tipo == "Civil":
-            if opcao == "3":
-                ocorrencia = criarOcorrencia(usuario)
-                if ocorrencia:
-                    lista_ocorrencias.append(ocorrencia)
-                atendente = AtendimentoService.designarAtendente(ocorrencia, usuarios, lista_atendimentos)
-                if atendente:
-                    novo_atendimento = Atendimento(atendente=atendente, ocorrencia=ocorrencia)
-                    lista_atendimentos.append(novo_atendimento)
-                    ocorrencia.status = "Em Atendimento"
-                    print(f"Ocorrência enviada para o atendente: {atendente.nome}")
-                else:
-                    print("Ocorrência registrada. Aguardando atendente disponível na sua cidade.")
-
             elif opcao == "4":
                 print("\nMinhas Ocorrências:")
                 minhas_ocorrencias = [o for o in lista_ocorrencias if o.civil == usuario]
@@ -192,13 +155,6 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                             print("\nVocê ainda não possui um perfil cadastrado.")
                         else:
                             print(usuario.perfil_medico)
-                    elif sub_opcao == "2":
-                        cadastrarPerfilMedicoMenu(usuario)
-                    elif sub_opcao == "3":
-                        if usuario.perfil_medico is None:
-                            print("\nVocê ainda não possui um perfil cadastrado.")
-                        else:
-                            atualizarPerfilMedicoMenu(usuario)
                     elif sub_opcao == "0":
                         break
                     else:
@@ -266,56 +222,6 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                 elif opcao == "8":
                     gerenciarResgates(usuario, lista_ocorrencias, atendimentos)
 
-def criarUsuario(lista_usuarios):
-    print("\nCRIAR NOVO USUÁRIO")
-    print("1 - Civil")
-    print("2 - Atendente")
-    print("3 - Agente")
-
-    tipo = input("Escolha o tipo: ")
-
-    nome = input("Nome: ")
-    cpf = input("CPF: ")
-    telefone = input("Telefone: ")
-    rua = input("Rua: ")
-    num = input("Número: ")
-    bairro = input("Bairro: ")
-    cidade = input("Cidade: ")
-    estado = input("Estado: ")
-    email = input("Email: ")
-    senha = input("Senha: ")
-
-    dados = {
-        "nome": nome,
-        "cpf": cpf,
-        "telefone": telefone,
-        "rua": rua,
-        "num": num, 
-        "bairro": bairro,
-        "cidade": cidade,
-        "estado": estado,
-        "email": email,
-        "senha": senha
-    }
-
-    if tipo == "2":
-        dados["turno"] = input("Turno: ")
-
-    elif tipo == "3":
-        dados["cargo"] = input("Cargo (Ex: Líder, Operacional): ")
-        dados["status"] = True 
-
-    try:
-        usuario = UsuarioFactory.criar(tipo, **dados)
-        lista_usuarios.append(usuario)
-        print(f"\n{usuario.tipo} '{usuario.nome}' criado com sucesso!")
-        
-    except ValueError as e:
-        print(f"\nErro: {e}")
-    except TypeError as e:
-        print(f"\nErro de Atributo: Verifique se os campos extras estão corretos nas subclasses.")
-        print(f"Detalhe técnico: {e}")
-
 def criarAlerta(lista_alertas, lista_ocorrencias):
     if not lista_ocorrencias:
         print("\nNão há ocorrências registradas para gerar alertas.")
@@ -377,86 +283,6 @@ def cancelarAlerta(lista_alertas):
     except ValueError:
         print("\nPor favor, digite um número válido.")
 
-def mostrarAlertas(usuario_logado, lista_alerta):
-    print(f"\n🔔 --- CENTRAL DE ALERTAS: {usuario_logado.cidade.upper()} ---")
-    encontrou = False
-
-    for alerta in lista_alerta :
-        oc = alerta.ocorrencia 
-        mostrar = False
-
-        if alerta.escopo == "cidade":
-            if oc.cidade.lower() == usuario_logado.cidade.lower():
-                mostrar = True
-
-        elif alerta.escopo == "bairro":
-            if (oc.cidade.lower() == usuario_logado.cidade.lower() and 
-                oc.bairro.lower() == usuario_logado.bairro.lower()):
-                mostrar = True
-
-        elif alerta.escopo == "rua":
-            if (oc.cidade.lower() == usuario_logado.cidade.lower() and 
-                oc.bairro.lower() == usuario_logado.bairro.lower() and
-                oc.rua.lower() == usuario_logado.rua.lower()):
-                mostrar = True
-
-        if mostrar:
-            print("-" * 40)
-            print(alerta) 
-            encontrou = True
-
-    if not encontrou:
-        print("Nenhum alerta no momento\n")
-    print("-" * 40)
-
-def criarOcorrencia(
-        usuario_logado):
-    print("\nABERTURA DE OCORRÊNCIA:")
-    print("1 - Policial")
-    print("2 - Médica")
-    print("3 - Incêndio")
-    print("4 - Enchente")
-    print("5 - Outros(especificar na descrição)")
-    
-    opcao = input("Selecione o tipo: ")
-    
-    tipos_nomes = {"1": "Policial", "2": "Médica", "3": "Incêndio", "4": "Enchente", "5": "Outros"}
-    tipo_selecionado = tipos_nomes.get(opcao, "Geral")
-
-    dados = {
-        "atendente": None,
-        "agente": None,
-        "civil": usuario_logado,
-        "dataHora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "status": "Aberta",
-        "descricao": input("Descrição detalhada: "),
-        "rua": input("Rua: "),
-        "bairro": input("Bairro: "),
-        "cidade": input("Cidade: "),
-        "estado": input("Estado: "),
-        "complemento": input("Complemento: "),
-        "gravidade": input("Gravidade (baixa/média/alta): "),
-        "tipo": tipo_selecionado,
-        "qtdAfetados": int(input("Qtd de pessoas afetadas: ")),
-        "equipe": None
-    }
-
-    if opcao == "1":
-        dados["tipoCrime"] = input("Tipo de crime: ")
-        dados["qtdCriminosos"] = int(input("Qtd de criminosos: "))
-        dados["descricaoSuspeito"] = input("Descrição do suspeito: ")
-        
-    elif opcao == "2":
-        dados["perfilMedico"] = input("Perfil médico (Ex: Diabético, Idoso): ")
-        dados["sintomas"] = input("Sintomas observados: ")
-    try:
-        nova_oc = OcorrenciaFactory.criar(opcao, **dados)
-        print(f"\nOcorrência de {nova_oc.tipo} registrada (ID: {nova_oc.id})!")
-        return nova_oc
-    except Exception as e:
-        print(f"Erro ao registrar: {e}")
-        return None
-
 def criarEquipeMenu(usuario_logado):
     print("\nCADASTRAR NOVA EQUIPE:")
     localidade = input("Localidade da base: ")
@@ -470,38 +296,6 @@ def criarEquipeMenu(usuario_logado):
     except Exception as e:
         print(f"❌ Erro ao criar equipe: {e}")
         return None
-
-def cadastrarPerfilMedicoMenu(usuario_civil):
-    if usuario_civil.perfil_medico is not None:
-        print("\nVocê já possui um perfil médico cadastrado.")
-        return
-
-    print("\nCADASTRO DE PERFIL MÉDICO:")
-    alergias = input("Alergias (ou Enter para 'Nenhuma'): ")
-    doencas = input("Doenças (ou Enter para 'Nenhuma'): ")
-    deficiencia = input("Deficiências (ou Enter para 'Nenhuma'): ")
-    tipo = input("Tipo Sanguíneo (ou Enter para 'Desconhecido'): ")
-
-    novo_perfil = PerfilMedicoFactory.criar(alergias, doencas, deficiencia, tipo)
-    usuario_civil.perfil_medico = novo_perfil
-    print("Perfil Médico cadastrado com sucesso.")
-
-def atualizarPerfilMedicoMenu(usuario_civil):
-    if usuario_civil.perfil_medico is None:
-        print("\nNenhum perfil encontrado para atualizar.")
-        return
-
-    perfil = usuario_civil.perfil_medico
-    print("\nATUALIZAÇÃO DE PERFIL MÉDICO:")
-    print("(Pressione Enter para manter a informação atual)")
-
-    nova_alergia = input(f"Alergias [{perfil.alergias}]: ")
-    nova_doenca = input(f"Doenças [{perfil.doencas}]: ")
-    nova_deficiencia = input(f"Deficiência [{perfil.deficiencia}]: ")
-    novo_tipo = input(f"Tipo Sanguíneo [{perfil.tipoSanguineo}]: ")
-
-    perfil.atualizar_dados(nova_alergia, nova_doenca, nova_deficiencia, novo_tipo)
-    print("Perfil médico atualizado.")
 
 def cadastrarVitimaMenu(lista_ocorrencias):
     print("\nCADASTRAR VÍTIMA NO LOCAL:")
@@ -597,7 +391,3 @@ def gerenciarResgates(usuario_logado, lista_ocorrencias, lista_resgates):
     except (ValueError, IndexError):
         print("Seleção inválida. Retornando ao menu principal.")
 
-
-
-if __name__ == "__main__":
-    menuPrincipal()
