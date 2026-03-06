@@ -1,5 +1,5 @@
 import tkinter as tk
-from infrastructure.interface import LifeAlertGUI
+from infrastructure.api.interface import LifeAlertGUI
 
 def main():
     db = {
