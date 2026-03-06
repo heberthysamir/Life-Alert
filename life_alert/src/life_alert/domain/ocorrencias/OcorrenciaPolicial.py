@@ -1,7 +1,7 @@
 from .Ocorrencia import Ocorrencia
 class OcorrenciaPolicial(Ocorrencia):
-    def __init__(self, tipoCrime, qtdCriminosos, descricaoSuspeito, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, tipoCrime, qtdCriminosos, descricaoSuspeito, **kwargs):
+        super().__init__(**kwargs)
         self.tipoCrime = tipoCrime
         self.qtdCriminosos = qtdCriminosos
         self.descricaoSuspeito = descricaoSuspeito
