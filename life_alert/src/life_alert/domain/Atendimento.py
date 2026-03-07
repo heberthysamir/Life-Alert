@@ -2,13 +2,14 @@ import datetime
 
 class Atendimento:
     _id_auto = 1
-    def __init__(self, atendente, ocorrencia, civil=None, grauUrgencia="Não definido", horaInicio=None, horaFinal=None):
+    def __init__(self, atendente, ocorrencia, civil=None, grauUrgencia="Não definido",relatorio="Não definido", horaInicio=None, horaFinal=None):
         self.id = Atendimento._id_auto
         Atendimento._id_auto += 1
         self.atendente = atendente
         self.ocorrencia = ocorrencia
         self.civil = civil if civil else ocorrencia.civil
         self.grauUrgencia = grauUrgencia
+        self.relatorio = relatorio
         if horaInicio is None:
             self.horaInicio = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         else:

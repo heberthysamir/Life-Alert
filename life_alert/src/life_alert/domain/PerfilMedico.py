@@ -4,7 +4,7 @@ class PerfilMedico:
         self.doencas = doencas
         self.deficiencia = deficiencia
         self.tipoSanguineo = tipoSanguineo
-        self.contatoEmerg = contatoEmerg
+        self.contatoEmerg = contatoEmerg 
 
     def atualizar_dados(self, nova_alergia=None, nova_doenca=None, nova_deficiencia=None, novo_tipo=None):
         """Atualiza apenas os campos que forem passados"""
