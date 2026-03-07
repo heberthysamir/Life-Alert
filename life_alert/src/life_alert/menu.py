@@ -116,13 +116,13 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                         if vitima_sel.atualizar_situacao(nova_sit):
                             print("✅ Situação atualizada!")
 
-            if opcao == "4":
+        if opcao == "4":
                 nova_v = cadastrarVitimaMenu(lista_ocorrencias)
                 if nova_v:
                     lista_vitimas.append(nova_v)
                     print(f"✅ Vítima {nova_v.nome} registrada.")
                     
-            elif usuario.cargo.lower() == "lider":
+        elif usuario.cargo.lower() == "lider":
                 if opcao == "5":
                     nova_equipe = criarEquipeMenu(usuario)
                     if nova_equipe:
