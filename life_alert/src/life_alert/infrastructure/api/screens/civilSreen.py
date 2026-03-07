@@ -2,6 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from application.alertasService import AlertaService 
 
+PRIMARY = "#c53030"  
+BG = "#f4f7fb"
+CARD = "#ffffff"
+TEXT = "#243444"
+MUTED = "#6b7280"
+
 class CivilScreen:
     @staticmethod
     def render_lista_alertas(gui, container):
@@ -95,24 +101,31 @@ class CivilScreen:
     
     @staticmethod
     def render_criar_ocorrencia(gui, container):
-        tk.Label(container, text="ABERTURA DE OCORRÊNCIA", font=gui.font_header, bg="#f4f7fb", fg="#c53030").pack(pady=20)
+        # Cores vindas da interface principal para manter o estilo
+        PRIMARY = "#c53030"
+        BG = "#f4f7fb"
+        CARD = "#ffffff"
+
+        tk.Label(container, text="ABERTURA DE OCORRÊNCIA", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
         
-        card = tk.Frame(container, bg="#ffffff", padx=30, pady=20)
+        card = tk.Frame(container, bg=CARD, padx=30, pady=20)
         card.pack(pady=10, padx=50, fill=tk.BOTH, expand=True)
 
-        # 1. Múltipla Seleção de Tipos
-        tk.Label(card, text="Tipos de Ocorrência:", bg="#ffffff", font=("Segoe UI", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
+        # 1. Múltipla Seleção de Tipos (Checkbuttons)
+        tk.Label(card, text="Tipos de Ocorrência (selecione todos que se aplicam):", 
+                 bg=CARD, font=("Segoe UI", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
 
         gui.tipos_selecionados = {}
         tipos_disponiveis = ["Policial", "Médica", "Incêndio", "Enchente", "Outros"]
         
-        frame_checks = tk.Frame(card, bg="#ffffff")
+        frame_checks = tk.Frame(card, bg=CARD)
         frame_checks.grid(row=1, column=0, columnspan=2, sticky="w", pady=5)
 
-        for tipo in tipos_disponiveis:
+        for i, tipo in enumerate(tipos_disponiveis):
             var = tk.BooleanVar()
-            chk = tk.Checkbutton(frame_checks, text=tipo, variable=var, bg="#ffffff", 
-                                 command=gui.atualizar_campos_extras_oc)
+            # IMPORTANTE: command=gui.atualizar_campos_extras_oc faz a mágica de aparecer os campos
+            chk = tk.Checkbutton(frame_checks, text=tipo, variable=var, bg=CARD, 
+                                 activebackground=CARD, command=gui.atualizar_campos_extras_oc)
             chk.pack(side=tk.LEFT, padx=5)
             gui.tipos_selecionados[tipo] = var
 
@@ -125,55 +138,60 @@ class CivilScreen:
         
         gui.inputs_oc = {}
         for i, (label, chave) in enumerate(campos_fixos):
-            tk.Label(card, text=f"{label}:", bg="#ffffff").grid(row=i+2, column=0, sticky="w", pady=2)
+            tk.Label(card, text=f"{label}:", bg=CARD).grid(row=i+2, column=0, sticky="w", pady=2)
             ent = ttk.Entry(card, width=33)
             ent.grid(row=i+2, column=1, pady=2, padx=10)
             gui.inputs_oc[chave] = ent
 
-        # 3. Frame para Campos Dinâmicos
-        gui.frame_extra_oc = tk.Frame(card, bg="#ffffff")
+        # 3. Frame para Campos Dinâmicos (Crime e Médico aparecem aqui)
+        gui.frame_extra_oc = tk.Frame(card, bg=CARD)
         gui.frame_extra_oc.grid(row=10, columnspan=2, sticky="ew", pady=10)
         gui.inputs_extras_oc = {}
 
         # 4. Botão Finalizar
-        tk.Button(card, text="Enviar Ocorrência", bg="#c53030", fg="white", relief=tk.FLAT,
+        tk.Button(card, text="Enviar Ocorrência", bg=PRIMARY, fg="white", relief=tk.FLAT,
                   command=gui.confirmar_ocorrencia, pady=10, cursor="hand2"
                   ).grid(row=11, columnspan=2, sticky="ew", pady=20)
 
     @staticmethod
     def render_listar_ocorrencias(gui, container):
-        tk.Label(container, text="MINHAS OCORRÊNCIAS", font=gui.font_header, bg="#f4f7fb", fg="#c53030").pack(pady=20)
+        PRIMARY = "#c53030"
+        BG = "#f4f7fb"
+        TEXT = "#243444"
+
+        tk.Label(container, text="MINHAS OCORRÊNCIAS", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
         
-        # Filtro de dados
         minhas_ocs = [oc for oc in gui.db["ocorrencias"] if oc.civil == gui.usuario_logado]
 
         if not minhas_ocs:
-            tk.Label(container, text="Nenhuma ocorrência registrada.", bg="#f4f7fb").pack(pady=50)
+            tk.Label(container, text="Você ainda não registrou nenhuma ocorrência.", 
+                    font=("Segoe UI", 10), bg=BG, fg=TEXT).pack(pady=50)
             return
 
-        frame_tabela = tk.Frame(container, bg="#f4f7fb")
+        frame_tabela = tk.Frame(container, bg=BG)
         frame_tabela.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
 
         colunas = ("id", "data", "tipo", "status", "gravidade")
-        tabela = ttk.Treeview(frame_tabela, columns=colunas, show="headings")
+        tabela = ttk.Treeview(frame_tabela, columns=colunas, show="headings", height=15)
         
-        tabela.heading("id", text="ID")
-        tabela.heading("data", text="Data/Hora")
-        tabela.heading("tipo", text="Tipo")
-        tabela.heading("status", text="Status")
+        tabela.heading("id", text="ID"); tabela.heading("data", text="Data/Hora")
+        tabela.heading("tipo", text="Tipo"); tabela.heading("status", text="Status")
         tabela.heading("gravidade", text="Gravidade")
+
+        tabela.column("id", width=50, anchor="center")
+        tabela.column("tipo", width=180, anchor="w")
 
         for oc in minhas_ocs:
             tabela.insert("", tk.END, values=(oc.id, oc.dataHora, oc.tipo, oc.status.upper(), oc.gravidade))
 
         scrollbar = ttk.Scrollbar(frame_tabela, orient=tk.VERTICAL, command=tabela.yview)
         tabela.configure(yscroll=scrollbar.set)
-        
         tabela.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        tk.Button(container, text="Ver Detalhes", bg="#c53030", fg="white", relief=tk.FLAT, pady=10,
-                  command=lambda: gui.exibir_detalhes_oc_selecionada(tabela, minhas_ocs)
-                  ).pack(pady=20)
+        tk.Button(container, text="Ver Detalhes da Ocorrência Selecionada", 
+        bg=PRIMARY, fg="white", relief=tk.FLAT, pady=10,
+        command=lambda: gui.exibir_detalhes_oc_selecionada(tabela, minhas_ocs)
+        ).pack(pady=20)
     
     

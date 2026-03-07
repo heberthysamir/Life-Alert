@@ -9,7 +9,6 @@ class Atendente(Usuario):
         acoes = super().obter_funcionalidades() # Pega as ações de atualizar/excluir
         acoes.extend([
             ("🎧 Atendimentos Ativos", lambda container: self.gui_ref.tela_gerenciar_atendimentos(container)),
-            ("🚑 Encaminhar Resgate", lambda container: self.gui_ref.tela_encaminhar_resgate(container)),
             ("⚠️ Gerenciar Alertas", lambda container: self.gui_ref.tela_painel_alertas(container))
         ])
         return acoes

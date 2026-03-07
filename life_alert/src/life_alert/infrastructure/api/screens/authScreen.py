@@ -35,7 +35,7 @@ class AuthScreen:
         card = tk.Frame(gui.main_container, bg="#ffffff", padx=40, pady=40)
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.5, relheight=0.5)
 
-        tk.Label(card, text="QUERO ME CADASTRAR COMO:", fg="#c53030", bg="#ffffff", font=gui.font_header).pack(pady=20)
+        tk.Label(card, text="QUERO ME CADASTRAR COMO:", fg="#c53030", bg="#ffffff", font=gui.font_header).pack(pady=1)
 
         opcoes = [("Civil", "1"), ("Atendente", "2"), ("Agente de Resgate", "3")]
         
@@ -43,7 +43,7 @@ class AuthScreen:
             tk.Button(card, text=texto, font=gui.font_sub, bg="#f4f7fb", fg="#243444", relief=tk.FLAT,
                       command=lambda v=valor: AuthScreen.render_formulario_cadastro(gui, v), pady=8).pack(fill=tk.X, pady=5)
         
-        tk.Button(card, text="Voltar", bg="#ffffff", fg="#6b7280", command=lambda: AuthScreen.render_login(gui)).pack(pady=10)
+        tk.Button(card, text="Voltar", bg="#ffffff", fg="#6b7280", command=lambda: AuthScreen.render_login(gui)).pack(pady=8)
 
     @staticmethod
     def render_formulario_cadastro(gui, tipo):

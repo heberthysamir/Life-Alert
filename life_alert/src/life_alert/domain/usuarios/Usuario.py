@@ -20,6 +20,7 @@ class Usuario:
     
     def obter_funcionalidades(self):
         return [
+            ("🔔 Ver Alertas", lambda container: self.gui_ref.tela_central_alertas(container)),
             ("👤 Atualizar Dados", lambda container: self.gui_ref.tela_atualizar_dados(container)),
             ("🗑️ Excluir Conta", lambda container: self.gui_ref.tela_excluir_conta(container))
         ]

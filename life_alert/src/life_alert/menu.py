@@ -100,96 +100,8 @@ def menuEquipe(lista_equipes, lista_usuarios, usuario_logado):
                 print("Opção inválida, tente novamente.")
  
 def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_equipes, lista_alerta, lista_vitimas):
-    while True:
-        print(f"\nUsuário: {usuario.nome} | Cargo/Tipo: {getattr(usuario, 'cargo', usuario.tipo)}")
-        usuario.exibirMenu()
-        opcao = input("Escolha uma opção: ")
-        
-        if opcao == "0":
-            break
-
-        elif opcao == "1":
-            print("\nAtualizar Dados:")
-            novo_nome = input("Novo nome (ou Enter para manter): ")
-            novo_tel = input("Novo telefone (ou Enter para manter): ")
-            novo_email = input("Novo e-mail (ou Enter para manter): ")
-            nova_senha = input("Nova senha (ou Enter para manter): ")
-            usuario.atualizarUsuario(
-                novo_nome=novo_nome, 
-                novo_telefone=novo_tel, 
-                novo_email=novo_email, 
-                nova_senha=nova_senha
-            )
-
-        elif opcao == "2":
-            confirmacao = input("Tem certeza que deseja excluir sua conta? (sim/não): ")
-            if confirmacao.lower() == 'sim':
-                removido = usuario.excluirUsuario(usuarios)
-                if removido:
-                    print("Conta excluída com sucesso.")
-                    return 
-                else:
-                    print(f"\nUsuário não encontrado")
-
-            elif opcao == "4":
-                print("\nMinhas Ocorrências:")
-                minhas_ocorrencias = [o for o in lista_ocorrencias if o.civil == usuario]
-                if not minhas_ocorrencias:
-                    print("Você não tem ocorrências registradas.")
-                else:
-                    for o in minhas_ocorrencias:
-                        print(o)
-
-            elif opcao == "5":
-                while True:
-                    print("\nGerenciamento do perfil médico:")
-                    print("0 - Voltar")
-                    print("1 - Visualizar perfil")
-                    print("2 - Cadastrar perfil")
-                    print("3 - Atualizar perfil")
-
-                    sub_opcao = input("\nEscolha uma opção: ")
-
-                    if sub_opcao == "1":
-                        if usuario.perfil_medico is None:
-                            print("\nVocê ainda não possui um perfil cadastrado.")
-                        else:
-                            print(usuario.perfil_medico)
-                    elif sub_opcao == "0":
-                        break
-                    else:
-                        print("Opção inválida.")
-
-        elif usuario.tipo == "Atendente":
-            if opcao == "3":
-                meus_atendimentos = [a for a in lista_atendimentos if a.atendente == usuario]
-                if not meus_atendimentos:
-                    print("\nVocê não possui atendimentos designados.")
-                else:
-                    print("\nSEUS ATENDIMENTOS:")
-                    for i, at in enumerate(meus_atendimentos):
-                        print(f"[{i}] {at}")
-                    
-                    escolha = input("\nSelecione o índice para gerenciar (ou 's' para sair): ")
-                    if escolha.isdigit() and int(escolha) < len(meus_atendimentos):
-                        at_sel = meus_atendimentos[int(escolha)]
-                        at_sel.atualizarAtendimento()
-
-            elif opcao == "4":
-                Atendimento.encaminharResgate(lista_equipes, lista_ocorrencias)
-            elif opcao == "5":
-                print("1 - Criar Alerta")
-                print("2 - Cancelar Alerta")
-                sub_opcao = input("Escolha: ")
-                if sub_opcao == "1":
-                    criarAlerta(alertas, lista_ocorrencias)
-                elif sub_opcao == "2":
-                    cancelarAlerta(alertas)
-                else:
-                    print("Opção inválida.")
-
-        elif usuario.tipo == "Agente":
-            if opcao == "3":
+        opcao = input("d")
+        if usuario.tipo == "Agente":
                 if not lista_vitimas:
                     print("\nNenhuma vítima cadastrada no sistema.")
                 else:
@@ -204,7 +116,7 @@ def menuUsuario(usuario, usuarios, lista_ocorrencias, lista_atendimentos, lista_
                         if vitima_sel.atualizar_situacao(nova_sit):
                             print("✅ Situação atualizada!")
 
-            elif opcao == "4":
+            if opcao == "4":
                 nova_v = cadastrarVitimaMenu(lista_ocorrencias)
                 if nova_v:
                     lista_vitimas.append(nova_v)
