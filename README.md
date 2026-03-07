@@ -14,38 +14,64 @@
 
 ```
 
-life_alert/
+life-alert
 |
-├── src/life_alert/           
-|   ├── ocorrencias/
-|   |   ├── Ocorrencia.py
-|   |   ├── OcorrenciaMedica.py
-|   |   ├── OcorrenciaPolicial.py
-|   |   └── __init__.py
-|   |
-|   ├── usuarios/
-|   |   ├── Usuario.py
-|   |   ├── UsuarioAgente.py
-|   |   ├── UsuarioAtendente.py
-|   |   ├── UsuarioCivil.py
-|   |   └── __init__.py
-|   |
-|   ├── Alerta.py
-|   ├── Atendimento.py
-|   ├── EquipeResgate.py
-|   ├── PerfilMedico.py
-|   ├── Relatorio.py
-|   ├── Regate.py
-|   ├── Vitima.py
-|   ├── __init__.py
-|   └── menu.py
+├──life_alert/
 |
-├── tests/           
-|   └── __init__.py
+|   ├── src/life_alert/           
+|   |   ├── application/
+|   |   |   ├── alertasFactory.py
+|   |   |   ├── alertasService.py
+|   |   |   ├── atendimentoService.py
+|   |   |   ├── equipeFactory.py
+|   |   |   ├── ocorrenciaFactory.py
+|   |   |   ├── perfilMedicoFactory.py
+|   |   |   ├── relatorioService.py
+|   |   |   ├── usuariosFactory.py
+|   |   |   └── vitimaFactory.py
+|   |   |
+|   |   ├── domain/
+|   |   |   ├── ocorrencias/
+|   |   |   |   ├── Ocorrencia.py
+|   |   |   |   ├── OcorrenciaMedica.py
+|   |   |   |   ├── OcorrenciaPolicial.py
+|   |   |   |   └── __init__.py
+|   |   |   |
+|   |   |   ├── usuarios/
+|   |   |   |   ├── Usuario.py
+|   |   |   |   ├── UsuarioAgente.py
+|   |   |   |   ├── UsuarioAtendente.py
+|   |   |   |   ├── UsuarioCivil.py
+|   |   |   |   └── __init__.py
+|   |   |   |
+|   |   |   ├── Alerta.py
+|   |   |   ├── Atendimento.py
+|   |   |   ├── EquipeResgate.py
+|   |   |   ├── PerfilMedico.py
+|   |   |   ├── Relatorio.py
+|   |   |   ├── Resgate.py
+|   |   |   ├── Vitima.py
+|   |   |   └── __init__.py
+|   |   |   
+|   |   ├── infrastructure/
+|   |   |   ├── api/
+|   |   |   |   ├── screens/
+|   |   |   |   |   ├── agenteScreen.py
+|   |   |   |   |   ├── atendenteScreen.py
+|   |   |   |   |   ├── authScreen.py
+|   |   |   |   |   └── civilScreen.py
+|   |   |   |   ├── __init__.py
+|   |   |   |   └── interface.py
+|   |   |
+|   |   ├── main.py
+|   |   └── menu.py
+|   ├── tests/
+|   |   ├── __init__.py
+|   |   └── tests_sistema.py
+|   ├── poetry.lock
+|   └── pyproject.toml
 |
-├── README.md
-├── poetry.lock
-└── pypoject.toml
+└── README.md
 
 ```
 
