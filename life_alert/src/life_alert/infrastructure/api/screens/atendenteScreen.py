@@ -55,13 +55,21 @@ class AtendenteScreen:
     @staticmethod
     def _render_aba_criar_alerta(gui, frame):
         tk.Label(frame, text="Selecione uma Ocorrência Base:", bg="#ffffff", font=("Segoe UI", 10, "bold")).pack(anchor="w")
+        todas_ocs = gui.db.get("ocorrencias", [])
+        cidade_atendente = gui.usuario_logado.cidade.strip().lower()
         
-        # Combobox com as ocorrências disponíveis
-        ocs = gui.db.get("ocorrencias", [])
-        lista_oc_str = [f"{i} - {oc.tipo} ({oc.bairro})" for i, oc in enumerate(ocs)]
+        ocs_disponiveis = [
+            (i, oc) for i, oc in enumerate(todas_ocs) 
+            if oc.status != "Finalizada" and oc.cidade.strip().lower() == cidade_atendente
+        ]
+
+        lista_oc_str = [f"{i} - {oc.tipo} ({oc.bairro}) | Status: {oc.status}" for i, oc in ocs_disponiveis]
         
         gui.combo_oc_alerta = ttk.Combobox(frame, values=lista_oc_str, width=50, state="readonly")
         gui.combo_oc_alerta.pack(pady=10)
+
+        if not lista_oc_str:
+            gui.combo_oc_alerta.set("Nenhuma ocorrência ativa para gerar alertas")
 
         tk.Label(frame, text="Título do Alerta:", bg="#ffffff").pack(anchor="w")
         gui.ent_titulo_alerta = ttk.Entry(frame, width=53)
@@ -139,12 +147,20 @@ class AtendenteScreen:
 
         # 2. Selecionar Equipe (Para o Resgate)
         tk.Label(right_col, text="Designar Equipe de Resgate:", bg="#ffffff").pack(anchor="w", pady=(10,0))
-        equipes = gui.db.get("equipes", [])
-        nomes_equipes = [f"EQ {eq.id} - {eq.nome}" for eq in equipes]
+        equipes_todas = gui.db.get("equipes", [])
+
+        cidade_atendente = gui.usuario_logado.cidade.strip().lower()
+        equipes_filtradas = [
+            eq for eq in equipes_todas 
+            if hasattr(eq, 'localidade') and eq.localidade.strip().lower() == cidade_atendente
+        ]
+        nomes_equipes = [f"ID: {eq.id} | {eq.setor} - {eq.especialidade}" for eq in equipes_filtradas]
         gui.ent_equipe_resgate = ttk.Combobox(right_col, values=nomes_equipes, state="readonly")
         gui.ent_equipe_resgate.pack(fill=tk.X, pady=5)
 
-        # 3. Relatório / Complemento
+        if not nomes_equipes:
+            gui.ent_equipe_resgate.set("Nenhuma equipe disponível na sua cidade")
+
         tk.Label(right_col, text="Relatório/Observações:", bg="#ffffff").pack(anchor="w", pady=(10,0))
         gui.txt_relatorio = tk.Text(right_col, height=4)
         gui.txt_relatorio.pack(fill=tk.X, pady=5)
@@ -152,3 +168,61 @@ class AtendenteScreen:
         # Botão Finalizar e Enviar
         tk.Button(right_col, text="FINALIZAR E ENVIAR RESGATE", bg="#2f855a", fg="white", 
                   font=("Segoe UI", 10, "bold"), command=lambda: gui.processar_despacho_final(atendimento)).pack(fill=tk.X, pady=20)
+        
+    @staticmethod
+    def render_gerenciar_membros_equipe(gui, container, equipe):
+        for w in container.winfo_children(): w.destroy()
+        
+        tk.Label(container, text=f"MEMBROS DA EQUIPE #{equipe.id}", font=gui.font_header, bg="#f4f7fb").pack(pady=20)
+
+        main_frame = tk.Frame(container, bg="#f4f7fb")
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20)
+
+        # --- COLUNA ESQUERDA: Membros Atuais ---
+        left_col = tk.Frame(main_frame, bg="white", padx=15, pady=15, relief=tk.RIDGE, borderwidth=1)
+        left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
+        
+        tk.Label(left_col, text="Membros Atuais", font=("Segoe UI", 10, "bold"), bg="white").pack()
+        
+        for agente in equipe.agentes:
+            f = tk.Frame(left_col, bg="white")
+            f.pack(fill=tk.X, pady=2)
+            tk.Label(f, text=f"{agente.nome} ({agente.cargo})", bg="white").pack(side=tk.LEFT)
+            # Botão Remover (Lógica cmd == "2" do seu terminal)
+            tk.Button(f, text="X", fg="red", bg="white", relief=tk.FLAT,
+                      command=lambda a=agente: gui.logica_remover_agente(gui, container, equipe, a)).pack(side=tk.RIGHT)
+
+        # --- COLUNA DIREITA: Adicionar Novos (Lógica cmd == "1") ---
+        right_col = tk.Frame(main_frame, bg="white", padx=15, pady=15, relief=tk.RIDGE, borderwidth=1)
+        right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10)
+        
+        tk.Label(right_col, text="Agentes Disponíveis", font=("Segoe UI", 10, "bold"), bg="white").pack()
+
+        # Filtra usuários que são Agentes e NÃO estão nesta equipe
+        todos_usuarios = gui.db.get("usuarios", [])
+        disponiveis = [u for u in todos_usuarios if u.tipo == "Agente" and u not in equipe.agentes]
+
+        if not disponiveis:
+            tk.Label(right_col, text="Nenhum agente disponível.", bg="white", fg="gray").pack(pady=20)
+        else:
+            for ag in disponiveis:
+                f = tk.Frame(right_col, bg="white")
+                f.pack(fill=tk.X, pady=2)
+                tk.Label(f, text=f"{ag.nome} ({ag.cargo})", bg="white").pack(side=tk.LEFT)
+                tk.Button(f, text="+ Adicionar", bg="#2f855a", fg="white", font=("Segoe UI", 8),
+                          command=lambda a=ag: gui.logica_adicionar_agente(gui, container, equipe, a)).pack(side=tk.RIGHT)
+
+        tk.Button(container, text="Voltar", command=lambda: gui.render_menu_equipes(gui, container)).pack(pady=20)
+
+    @staticmethod
+    def logica_adicionar_agente(gui, container, equipe, agente):
+        equipe.adicionar_membro(agente) # Usa o método da sua classe Equipe
+        messagebox.showinfo("Sucesso", f"{agente.nome} adicionado à equipe!")
+        gui.render_gerenciar_membros_equipe(gui, container, equipe)
+
+    @staticmethod
+    def logica_remover_agente(gui, container, equipe, agente):
+        if messagebox.askyesno("Confirmar", f"Remover {agente.nome} da equipe?"):
+            equipe.remover_membro(agente.id) # Usa o método da sua classe Equipe
+            messagebox.showinfo("Sucesso", "Membro removido.")
+            gui.render_gerenciar_membros_equipe(gui, container, equipe)

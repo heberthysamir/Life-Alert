@@ -11,12 +11,7 @@ class Resgate:
         self.dataFim = None
         self.qtdResgatados = 0
 
-    def adicionarVitima(self, newQtd):
-        self.qtdResgatados = newQtd
-        return f"Dados atualizados com sucesso! \nQuantidade de resgatados até o momento: {self.qtdResgatados}"
-
-
-    def concluirResgate(self):  
-        self.dataFim = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        self.ocorrencia.status = "Finalizada"
-        return f"Resgate finalizado em {self.dataFim}."
+    def finalizar(self, relato, total_vitimas):
+        self.descricao = relato
+        self.qtdResgatados = total_vitimas
+        self.dataFim = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
