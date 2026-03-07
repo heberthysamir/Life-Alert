@@ -2,25 +2,16 @@ import datetime
 
 class Resgate:
     _id_auto = 1
-    def __init__(self, id, ocorrencia, dataInicio, descricao, dataFim, qtdResgatados):
+    def __init__(self, ocorrencia, dataInicio=None, descricao="", dataFim=None, qtdResgatados=0):
         self.id = Resgate._id_auto
         Resgate._id_auto += 1
         self.ocorrencia = ocorrencia
-        self.dataInicio = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        self.dataInicio = dataInicio or datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.descricao = descricao
-        self.dataFim = None
-        self.qtdResgatados = 0
+        self.dataFim = dataFim
+        self.qtdResgatados = qtdResgatados
 
-    def adicionarVitima(self, newQtd):
-        self.qtdResgatados = newQtd
-        return f"Dados atualizados com sucesso! \nQuantidade de resgatados até o momento: {self.qtdResgatados}"
-
-
-    def concluirResgate(self):  
-        if(hasattr(self.ocorrencia, 'vitimas')):
-            for vitima in self.ocorrencia.vitimas:
-                if(vitima.situacao.strip().lower() == "desaparecida"):
-                    return("Não é possível concluir o resgate pois há vítimas com situação 'Desaparecida'.")
-        self.dataFim = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-        self.ocorrencia.status = "Finalizada"
-        return f"Resgate finalizado em {self.dataFim}."
+    def finalizar(self, relato, total_vitimas):
+        self.descricao = relato
+        self.qtdResgatados = total_vitimas
+        self.dataFim = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

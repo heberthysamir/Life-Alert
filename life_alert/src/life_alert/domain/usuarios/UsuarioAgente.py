@@ -11,22 +11,10 @@ class Agente(Usuario):
         acoes = super().obter_funcionalidades() # Pega as ações de atualizar/excluir
         acoes.extend([
             ("👥 Gerenciar Vítimas", lambda container: self.gui_ref.tela_gerenciar_vitimas(container)),
-            ("🚩 Registrar Vítima", lambda container: self.gui_ref.tela_cadastrar_vitima(container))
+            ("Minhas Equipes & Resgates", lambda container: self.gui_ref.tela_painel_operacional(container))
         ])
-        
-        # Polimorfismo baseado no cargo
         if hasattr(self, 'cargo') and self.cargo.lower() == "lider":
-            acoes.append(("🛠️ Criar Equipe", lambda container: self.gui_ref.tela_criar_equipe(container)))
             acoes.append(("📋 Menu Equipes", lambda container: self.gui_ref.tela_menu_equipe(container)))
             acoes.append(("📊 Relatórios", lambda container: self.gui_ref.tela_relatorios(container)))
             
         return acoes
-    
-    def atualizarOcorrencia():
-        pass
-
-    def cadastrarEquipe():
-        pass
-
-    def removerEquipe():
-        pass

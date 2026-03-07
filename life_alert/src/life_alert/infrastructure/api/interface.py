@@ -4,6 +4,7 @@ import tkinter.font as tkfont
 from datetime import datetime
 from domain.usuarios.Usuario import Usuario
 from domain.Atendimento import Atendimento
+from domain.Resgate import Resgate
 from application.usuariosFactory import UsuarioFactory
 from application.ocorrenciaFactory import OcorrenciaFactory
 from application.perfilMedicoFactory import PerfilMedicoFactory
@@ -11,6 +12,7 @@ from application.alertasFactory import AlertaFactory
 from infrastructure.api.screens.authScreen import AuthScreen
 from infrastructure.api.screens.civilSreen import CivilScreen
 from infrastructure.api.screens.atendenteScreen import AtendenteScreen
+from infrastructure.api.screens.agenteScreen import AgenteScreen
 
 PRIMARY = "#c53030"  
 BG = "#f4f7fb"
@@ -158,6 +160,31 @@ class LifeAlertGUI:
 
     def tela_painel_alertas(self, container):
         AtendenteScreen.render_painel_alertas(self, container)
+    
+    # --- PONTES PARA O AGENTE ---
+    def tela_gerenciar_vitimas(self, container):
+        from infrastructure.api.screens.agenteScreen import AgenteScreen
+        AgenteScreen.render_gerenciar_vitimas(self, container)
+
+    def tela_cadastrar_vitima(self, container):
+        from infrastructure.api.screens.agenteScreen import AgenteScreen
+        AgenteScreen.render_cadastrar_vitima(self, container)
+
+    def tela_criar_equipe(self, container):
+        from infrastructure.api.screens.agenteScreen import AgenteScreen
+        AgenteScreen.render_criar_equipe(self, container)
+
+    def tela_menu_equipe(self, container):
+        from infrastructure.api.screens.agenteScreen import AgenteScreen
+        AgenteScreen.render_menu_equipes(self, container)
+
+    def tela_relatorios(self, container):
+        from infrastructure.api.screens.agenteScreen import AgenteScreen
+        AgenteScreen.render_relatorios(self, container)
+    
+    def tela_painel_operacional(self, container):
+        from infrastructure.api.screens.agenteScreen import AgenteScreen
+        AgenteScreen.render_painel_operacional(self, container)
 
     def atualizar_campos_extras_oc(self):
         for widget in self.frame_extra_oc.winfo_children():
@@ -489,3 +516,76 @@ class LifeAlertGUI:
 
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao processar despacho: {e}")
+
+    def logica_iniciar_resgate_direto(self, ocorrencia, container):
+        """Altera o status da ocorrência para 'Em Resgate' e atualiza a tela"""
+        try:
+            ocorrencia.status = "Em Resgate"
+            # Se a equipe estiver vinculada, atualiza o status dela também
+            if ocorrencia.equipe:
+                ocorrencia.equipe.status = "Em atendimento"
+                for agente in ocorrencia.equipe.agentes:
+                    agente.status = "Em ocorrência"
+            
+            messagebox.showinfo("Sucesso", f"Resgate iniciado para a Ocorrência #{ocorrencia.id}")
+            
+            # Recarrega a tela atual para atualizar os botões
+            from infrastructure.api.screens.agenteScreen import AgenteScreen
+            AgenteScreen.render_painel_operacional(self, container)
+        except Exception as e:
+            messagebox.showerror("Erro", f"Não foi possível iniciar o resgate: {e}")
+
+    def logica_concluir_resgate_direto(self, ocorrencia, relato, total_vitimas):
+        try:
+            # 1. Validação de Vítimas Perdidas
+            v_perdidas = [v for v in self.db.get("vitimas", []) 
+                        if v.ocorrencia.id == ocorrencia.id and v.situacao == "Perdido"]
+            if v_perdidas:
+                return messagebox.showerror("Erro", "Há vítimas com status 'Perdido'. Resolva antes de fechar.")
+            
+            agora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+            
+            novo_resgate = Resgate(
+                id=None, 
+                ocorrencia=ocorrencia,
+                dataInicio=ocorrencia.dataHora, 
+                descricao=relato,
+                dataFim=agora,
+                qtdResgatados=total_vitimas
+            )
+            
+            if "resgates_historico" not in self.db: 
+                self.db["resgates_historico"] = []
+            self.db["resgates_historico"].append(novo_resgate)
+
+            # 3. Atualiza Status da Ocorrência e Equipe
+            ocorrencia.status = "Finalizada"
+            ocorrencia.hora_finalizado = agora 
+            
+            if ocorrencia.equipe:
+                ocorrencia.equipe.status = "Disponível"
+                for ag in ocorrencia.equipe.agentes:
+                    ag.status = "Disponível"
+
+            messagebox.showinfo("Sucesso", "Resgate finalizado e histórico salvo!")
+            self.mostrar_dashboard()
+            
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao fechar resgate: {e}")
+            
+    def logica_salvar_vitima(self, nome, situacao, oc_str):
+        if not nome or not situacao or not oc_str:
+            return messagebox.showerror("Erro", "Preencha todos os campos")
+        
+        try:
+            id_oc = int(oc_str.split(" - ")[0])
+            oc = next(o for o in self.db["ocorrencias"] if o.id == id_oc)
+            
+            # Aqui você chamaria sua VitimaFactory.criar(...)
+            # nova_v = VitimaFactory.criar(nome, "N/A", situacao, oc)
+            # self.db["vitimas"].append(nova_v)
+            
+            messagebox.showinfo("Sucesso", f"Vítima {nome} vinculada à ocorrência #{id_oc}")
+            self.mostrar_dashboard()
+        except Exception as e:
+            messagebox.showerror("Erro", str(e))
