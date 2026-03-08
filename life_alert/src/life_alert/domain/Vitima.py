@@ -1,12 +1,17 @@
 class Vitima:
+    """Entidade Fraca - Vitima depende de Ocorrencia para existir"""
+
     def __init__(self, nome, idade, situacao, ocorrencia):
-        self._nome = None
-        self._idade = None
-        self._situacao = None
-        self._ocorrencia = None
-        
+        if not ocorrencia:
+            raise ValueError("Vítima deve estar vinculada a uma ocorrência válida.")
+
+        if hasattr(ocorrencia, 'id') and not ocorrencia.id:
+            raise ValueError("A ocorrência deve estar salva no banco antes de registrar vítimas.")
+
         self.nome = nome
         self.idade = idade
+        self.ocorrencia = ocorrencia  
+        self._situacao = None
         self.situacao = situacao
         self.ocorrencia = ocorrencia
 
