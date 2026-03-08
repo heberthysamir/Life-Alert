@@ -8,7 +8,8 @@ def main():
         "atendimentos": [],
         "equipes": [],
         "alertas": [],
-        "vitimas": []
+        "vitimas": [],
+        "resgate_historico": []
     }
 
     root = tk.Tk()

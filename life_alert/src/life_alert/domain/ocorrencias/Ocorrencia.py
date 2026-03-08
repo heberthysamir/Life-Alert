@@ -46,12 +46,3 @@ class Ocorrencia:
     def __str__(self):
         complemento = getattr(self, 'complemento', 'Sem complemento')
         return f"[{self.id}] {self.tipo} - Status: {self.status}\nDescrição: {self.descricao} \nHorário: {self.dataHora}\nGravidade: {self.gravidade}\nQuantidade de afetados: {self.qtdAfetados}\nEndereço: {self.rua},{self.bairro} - {complemento}\n"
-    
-    @staticmethod
-    def listarOcorrencias(lista_ocorrencias):
-        print("\nOcorrências Registradas:")
-        if not lista_ocorrencias:
-            print("Nenhuma ocorrência registrada.")
-            return
-        for o in lista_ocorrencias:
-            print(o)
