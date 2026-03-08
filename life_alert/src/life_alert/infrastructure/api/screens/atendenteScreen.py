@@ -234,4 +234,17 @@ class AtendenteScreen:
                 tk.Button(f, text="+ Adicionar", bg=SUCCESS, fg="white", font=("Segoe UI", 8), relief=tk.FLAT, cursor="hand2",
                           command=lambda a=ag: gui.logica_adicionar_agente(gui, container, equipe, a)).pack(side=tk.RIGHT)
 
-        tk.Button(container, text="Voltar", bg=BG, fg=TEXT, command=lambda: gui.render_menu_equipes(gui, container), cursor="hand2").pack(pady=20)
+        tk.Button(container, text="Voltar", command=lambda: gui.render_menu_equipes(gui, container)).pack(pady=20)
+
+    @staticmethod
+    def logica_adicionar_agente(gui, container, equipe, agente):
+        equipe.adicionar_membro(agente) 
+        messagebox.showinfo("Sucesso", f"{agente.nome} adicionado à equipe!")
+        gui.render_gerenciar_membros_equipe(gui, container, equipe)
+
+    @staticmethod
+    def logica_remover_agente(gui, container, equipe, agente):
+        if messagebox.askyesno("Confirmar", f"Remover {agente.nome} da equipe?"):
+            equipe.remover_membro(agente.id) 
+            messagebox.showinfo("Sucesso", "Membro removido.")
+            gui.render_gerenciar_membros_equipe(gui, container, equipe)
