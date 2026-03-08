@@ -1,10 +1,23 @@
 class Vitima:
+    """Entidade Fraca - Vitima depende de Ocorrencia para existir"""
+
     def __init__(self, nome, idade, situacao, ocorrencia):
+        # Validação obrigatória: ocorrência deve existir e ser válida
+        if not ocorrencia:
+            raise ValueError("Vítima deve estar vinculada a uma ocorrência válida.")
+
+        # Validação adicional: ocorrência deve ter ID (já estar salva no BD)
+        if hasattr(ocorrencia, 'id') and not ocorrencia.id:
+            raise ValueError("A ocorrência deve estar salva no banco antes de registrar vítimas.")
+
         self.nome = nome
         self.idade = idade
-        self.ocorrencia = ocorrencia
+        self.ocorrencia = ocorrencia  # Referência obrigatória à entidade forte
         self._situacao = None
         self.situacao = situacao
+
+        # ID composto: será gerado como (ocorrencia_id, sequencial)
+        self.id = None
 
     # Encapsulamento
 

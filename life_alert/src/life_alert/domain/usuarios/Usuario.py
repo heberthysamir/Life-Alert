@@ -1,8 +1,6 @@
 class Usuario:
-    _id_auto = 1
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, tipo):
-        self.id = Usuario._id_auto
-        Usuario._id_auto += 1
+        self.id = None
         self.nome = nome
         self.cpf = cpf
         self.telefone = telefone
@@ -16,8 +14,9 @@ class Usuario:
         self.tipo = tipo
 
     def __str__(self):
-        return f"[{self.id}] {self.nome} - {self.tipo}."
-    
+        id_str = self.id if self.id else "Novo"
+        return f"[{id_str}] {self.nome} - {self.tipo}."  
+      
     def obter_funcionalidades(self):
         return [
             ("🔔 Ver Alertas", lambda container: self.gui_ref.tela_central_alertas(container)),
@@ -25,19 +24,6 @@ class Usuario:
             ("🗑️ Excluir Conta", lambda container: self.gui_ref.tela_excluir_conta(container))
         ]
 
-    @staticmethod
-    def Login(lista_usuarios, email, senha):
-        """
-        Recebe a lista e as credenciais vindas da GUI e 
-        retorna o objeto usuário ou None.
-        """
-        if not lista_usuarios:
-            return None
-            
-        for u in lista_usuarios:
-            if u.email == email and u.senha == senha:
-                return u 
-        return None
     
     def atualizarUsuario(self, novo_nome=None, novo_telefone=None, novo_email=None, nova_senha=None, nova_rua=None, novo_num=None, novo_bairro=None, nova_cidade=None, novo_estado=None):
         if novo_nome: self.nome = novo_nome
@@ -50,9 +36,3 @@ class Usuario:
         if novo_bairro: self.bairro = novo_bairro
         if nova_cidade: self.cidade = nova_cidade
         if novo_estado: self.estado = novo_estado
-
-    def excluirUsuario(self, lista_usuarios):
-        if self in lista_usuarios:
-            lista_usuarios.remove(self)
-            return True
-        return False
