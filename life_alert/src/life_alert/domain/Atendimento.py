@@ -2,19 +2,74 @@ import datetime
 
 class Atendimento:
     _id_auto = 1
-    def __init__(self, atendente, ocorrencia, civil=None, grauUrgencia="Não definido",relatorio="Não definido", horaInicio=None, horaFinal=None):
+    
+    def __init__(self, atendente, ocorrencia, civil=None, grauUrgencia="Não definido", relatorio="Não definido", horaInicio=None, horaFinal=None):
         self.id = Atendimento._id_auto
         Atendimento._id_auto += 1
         self.atendente = atendente
         self.ocorrencia = ocorrencia
         self.civil = civil if civil else ocorrencia.civil
+        self._grauUrgencia = None
+        self._relatorio = None
+        self._horaInicio = None
+        self._horaFinal = None
+        
         self.grauUrgencia = grauUrgencia
         self.relatorio = relatorio
-        if horaInicio is None:
-            self.horaInicio = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        else:
-            self.horaInicio = horaInicio     
+        self.horaInicio = horaInicio
         self.horaFinal = horaFinal
+
+    @property
+    def grauUrgencia(self):
+        return self._grauUrgencia
+    
+    @grauUrgencia.setter
+    def grauUrgencia(self, valor):
+        urgencias_validas = ["baixa", "média", "alta", "Não definido"]
+        if isinstance(valor, str):
+            valor_lapidado = valor.strip().lower()
+            if valor_lapidado not in [u.lower() for u in urgencias_validas]:
+                raise ValueError(f"Grau de urgência deve ser um dos seguintes: {', '.join(urgencias_validas)}.")
+            mapa = {u.lower(): u for u in urgencias_validas}
+            self._grauUrgencia = mapa[valor_lapidado]
+        else:
+            raise ValueError("Grau de urgência deve ser uma string.")
+
+    @property
+    def relatorio(self):
+        return self._relatorio
+    
+    @relatorio.setter
+    def relatorio(self, valor):
+        if not isinstance(valor, str) or not valor.strip():
+            raise ValueError("Relatório não pode ser vazio.")
+        self._relatorio = valor.strip()
+
+    @property
+    def horaInicio(self):
+        return self._horaInicio
+    
+    @horaInicio.setter
+    def horaInicio(self, valor):
+        if valor is None:
+            self._horaInicio = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            if not isinstance(valor, str) or not valor.strip():
+                raise ValueError("Hora de início não pode ser vazia.")
+            self._horaInicio = valor.strip()
+
+    @property
+    def horaFinal(self):
+        return self._horaFinal
+    
+    @horaFinal.setter
+    def horaFinal(self, valor):
+        if valor is None:
+            self._horaFinal = None
+        else:
+            if not isinstance(valor, str) or not valor.strip():
+                raise ValueError("Hora final não pode ser vazia.")
+            self._horaFinal = valor.strip()
 
     def __str__(self):
         return f"Atendimento #{self.id} | Status: {self.ocorrencia.status} | Urgência: {self.grauUrgencia} | Local: {self.ocorrencia.bairro}"
@@ -44,12 +99,16 @@ class Atendimento:
         
         grauUrgencia = input("Grau de urgência (baixa/média/alta): ")
         horaInicio = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        atendimento = Atendimento(atendente=usuario_logado, civil=ocorrencia.civil, grauUrgencia=grauUrgencia, horaInicio=horaInicio, horaFinal=None, ocorrencia=ocorrencia)
-        ocorrencia.status = "Em Atendimento"
-        ocorrencia.atendente = usuario_logado
-
-        print(f"\nAtendimento iniciado para {ocorrencia.civil} com grau de urgência {grauUrgencia}.")
-        return atendimento
+        
+        try:
+            atendimento = Atendimento(atendente=usuario_logado, civil=ocorrencia.civil, grauUrgencia=grauUrgencia, horaInicio=horaInicio, horaFinal=None, ocorrencia=ocorrencia)
+            ocorrencia.status = "Em Atendimento"
+            ocorrencia.atendente = usuario_logado
+            print(f"\nAtendimento iniciado para {ocorrencia.civil} com grau de urgência {grauUrgencia}.")
+            return atendimento
+        except ValueError as e:
+            print(f"Erro ao iniciar atendimento: {e}")
+            return None
     
     def atualizarAtendimento(self):
         print(f"\nATUALIZANDO ATENDIMENTO:{self.id}")
@@ -57,15 +116,25 @@ class Atendimento:
         print(self.ocorrencia)
         print(f"Ocorrência: {self.ocorrencia.tipo} | Descrição: {self.ocorrencia.descricao}")
         novo_grau = input("Defina o grau de urgência (baixa/média/alta): ")
-        self.grauUrgencia = novo_grau
-        print("✅ Dados do atendimento atualizados com sucesso!")
+        try:
+            self.grauUrgencia = novo_grau
+            print("✅ Dados do atendimento atualizados com sucesso!")
+            return True
+        except ValueError as e:
+            print(f"Erro: {e}")
+            return False
 
     def alterarUrgencia(self):
         print(f"\nALTERANDO URGÊNCIA DO ATENDIMENTO #{self.id}")
         print(f"Urgência atual: {self.grauUrgencia}")
         novo_grau = input("Defina o novo grau de urgência (baixa/média/alta): ")
-        self.grauUrgencia = novo_grau
-        print("✅ Grau de urgência atualizado com sucesso!")
+        try:
+            self.grauUrgencia = novo_grau
+            print("✅ Grau de urgência atualizado com sucesso!")
+            return True
+        except ValueError as e:
+            print(f"Erro: {e}")
+            return False
 
     def encerrarAtendimento(self):
         self.horaFinal = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
