@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from application.alertasService import AlertaService 
 
+# Constantes de Estilo
 PRIMARY = "#c53030"  
 BG = "#f4f7fb"
 CARD = "#ffffff"
@@ -11,32 +12,37 @@ MUTED = "#6b7280"
 class CivilScreen:
     @staticmethod
     def render_lista_alertas(gui, container):
+        """
+        Filtra e renderiza os alertas relevantes baseados na localização do usuário.
+        Exibe cards visuais com o tipo de ocorrência, mensagem e escopo do alerta.
+        """
         alertas = AlertaService.filtrar_alertas_para_usuario(gui.usuario_logado, gui.db["alertas"])
         
         if not alertas:
             tk.Label(container, text="Nenhum alerta relevante para sua região no momento.", 
-                     bg="#f4f7fb", fg="#6b7280", font=("Segoe UI", 10, "italic")).pack(pady=20)
+                     bg=BG, fg=MUTED, font=("Segoe UI", 10, "italic")).pack(pady=20)
             return
 
-        # 2. Cria um frame de rolagem se houver muitos alertas (opcional, mas recomendado)
         for alerta in alertas:
-            card = tk.Frame(container, bg="#ffffff", padx=15, pady=10, highlightthickness=1, highlightbackground="#fee2e2")
+            card = tk.Frame(container, bg=CARD, padx=15, pady=10, highlightthickness=1, highlightbackground="#fee2e2")
             card.pack(fill=tk.X, padx=20, pady=5)
             
-            # Título com ícone (ex: 🚨 ALAGAMENTO)
-            tk.Label(card, text=f"🚨 {alerta.ocorrencia.tipo.upper()}", bg="#ffffff", 
-                     fg="#c53030", font=("Segoe UI", 10, "bold")).pack(anchor="w")
+            tk.Label(card, text=f"🚨 {alerta.ocorrencia.tipo.upper()}", bg=CARD, 
+                     fg=PRIMARY, font=("Segoe UI", 10, "bold")).pack(anchor="w")
             
-            # Mensagem do Alerta
-            tk.Label(card, text=alerta.mensagem, bg="#ffffff", wraplength=400, justify="left", font=("Segoe UI", 9)).pack(anchor="w")
+            tk.Label(card, text=alerta.mensagem, bg=CARD, wraplength=450, justify="left", font=("Segoe UI", 9)).pack(anchor="w")
             
-            # Localização e Escopo
             tk.Label(card, text=f"Local: {alerta.ocorrencia.bairro} ({alerta.escopo.capitalize()})", 
-                     bg="#ffffff", fg="#9ca3af", font=("Segoe UI", 8)).pack(anchor="w")
+                     bg=CARD, fg="#9ca3af", font=("Segoe UI", 8)).pack(anchor="w")
+
     @staticmethod
     def render_atualizar_dados(gui, container):
-        tk.Label(container, text="ATUALIZAR MEUS DADOS", font=gui.font_header, bg="#f4f7fb", fg="#c53030").pack(pady=20)
-        card = tk.Frame(container, bg="#ffffff", padx=30, pady=20)
+        """
+        Renderiza o formulário com os dados atuais do usuário para edição.
+        Mapeia campos de endereço e contato para atualização no banco de dados.
+        """
+        tk.Label(container, text="ATUALIZAR MEUS DADOS", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
+        card = tk.Frame(container, bg=CARD, padx=30, pady=20)
         card.pack(pady=10, padx=50, fill=tk.BOTH)
 
         campos = [
@@ -53,32 +59,40 @@ class CivilScreen:
 
         gui.inputs_atualizar = {}
         for i, (label, chave, valor_atual) in enumerate(campos):
-            tk.Label(card, text=f"{label}:", bg="#ffffff").grid(row=i, column=0, sticky="w", pady=2)
+            tk.Label(card, text=f"{label}:", bg=CARD).grid(row=i, column=0, sticky="w", pady=2)
             ent = ttk.Entry(card, width=40)
-            ent.insert(0, valor_atual)
+            ent.insert(0, str(valor_atual))
             ent.grid(row=i, column=1, pady=2, padx=10)
             gui.inputs_atualizar[chave] = ent
 
         tk.Button(card, text="Salvar Alterações", bg="#2b6cb0", fg="white", relief=tk.FLAT,
-                  command=gui.confirmar_atualizacao, pady=10).grid(row=len(campos), columnspan=2, sticky="ew", pady=20)
+                  command=gui.confirmar_atualizacao, pady=10, cursor="hand2").grid(row=len(campos), columnspan=2, sticky="ew", pady=20)
     
     @staticmethod
     def render_excluir_conta(gui, container):
-        tk.Label(container, text="EXCLUIR CONTA", font=gui.font_header, bg="#f4f7fb", fg="#c53030").pack(pady=20)
+        """
+        Renderiza o aviso crítico de exclusão de conta.
+        Exibe um alerta visual antes de permitir a remoção definitiva do usuário.
+        """
+        tk.Label(container, text="EXCLUIR CONTA", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
         
-        card = tk.Frame(container, bg="#ffffff", padx=40, pady=40)
+        card = tk.Frame(container, bg=CARD, padx=40, pady=40)
         card.pack(pady=20)
 
         tk.Label(card, text="Atenção!\nAo excluir sua conta, todos os seus dados serão removidos.\nDeseja prosseguir?", 
-                 bg="#ffffff", justify="center").pack(pady=20)
+                 bg=CARD, justify="center", font=("Segoe UI", 10)).pack(pady=20)
 
-        tk.Button(card, text="Sim, desejo excluir", bg="#c53030", fg="white", 
-                  command=gui.confirmar_exclusao, pady=10).pack(fill=tk.X)
+        tk.Button(card, text="Sim, desejo excluir", bg=PRIMARY, fg="white", relief=tk.FLAT,
+                  command=gui.confirmar_exclusao, pady=10, cursor="hand2").pack(fill=tk.X)
 
     @staticmethod
     def render_perfil_medico(gui, container):
-        tk.Label(container, text="MEU PERFIL MÉDICO", font=gui.font_header, bg="#f4f7fb", fg="#c53030").pack(pady=20)
-        card = tk.Frame(container, bg="#ffffff", padx=30, pady=20)
+        """
+        Renderiza ou edita as informações de saúde do usuário.
+        Crucial para que equipes de resgate saibam condições pré-existentes em emergências.
+        """
+        tk.Label(container, text="MEU PERFIL MÉDICO", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
+        card = tk.Frame(container, bg=CARD, padx=30, pady=20)
         card.pack(pady=10, padx=50, fill=tk.BOTH)
         
         p_atual = getattr(gui.usuario_logado, 'perfil_medico', None)
@@ -86,32 +100,39 @@ class CivilScreen:
                   ("Tipo Sanguíneo", "tipo_sanguineo"), ("Contatos de Emergência", "contatoEmerg")]
 
         gui.inputs_perfil = {}
+        attr_map = {
+            "alergias": "alergias",
+            "doencas": "doencas",
+            "deficiencia": "deficiencia",
+            "tipo_sanguineo": "tipoSanguineo",
+            "contatoEmerg": "contatoEmerg"
+        }
+
         for i, (label, chave) in enumerate(campos):
-            tk.Label(card, text=f"{label}:", bg="#ffffff").grid(row=i, column=0, sticky="w", pady=5)
+            tk.Label(card, text=f"{label}:", bg=CARD).grid(row=i, column=0, sticky="w", pady=5)
             ent = ttk.Entry(card, width=40)
             ent.grid(row=i, column=1, pady=5, padx=10)
+            
             if p_atual:
-                attr_map = {"tipo_sanguineo": "tipoSanguineo", "contatoEmerg": "contatoEmerg", 
-                            "alergias": "alergias", "doencas": "doencas", "deficiencia": "deficiencia"}
-                ent.insert(0, getattr(p_atual, attr_map[chave], ""))
+                valor = getattr(p_atual, attr_map[chave], "")
+                ent.insert(0, valor if valor else "")
+            
             gui.inputs_perfil[chave] = ent
 
         tk.Button(card, text="Salvar Perfil", bg="#2f855a", fg="white", relief=tk.FLAT,
-                  command=gui.salvar_perfil_medico, pady=10).grid(row=len(campos), columnspan=2, sticky="ew", pady=20)
+                  command=gui.salvar_perfil_medico, pady=10, cursor="hand2").grid(row=len(campos), columnspan=2, sticky="ew", pady=20)
     
     @staticmethod
     def render_criar_ocorrencia(gui, container):
-        # Cores vindas da interface principal para manter o estilo
-        PRIMARY = "#c53030"
-        BG = "#f4f7fb"
-        CARD = "#ffffff"
-
+        """
+        Renderiza o formulário dinâmico para abertura de socorro.
+        Inclui seleção múltipla de tipos e campos fixos de localização e descrição.
+        """
         tk.Label(container, text="ABERTURA DE OCORRÊNCIA", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
         
         card = tk.Frame(container, bg=CARD, padx=30, pady=20)
         card.pack(pady=10, padx=50, fill=tk.BOTH, expand=True)
 
-        # 1. Múltipla Seleção de Tipos (Checkbuttons)
         tk.Label(card, text="Tipos de Ocorrência (selecione todos que se aplicam):", 
                  bg=CARD, font=("Segoe UI", 10, "bold")).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 10))
 
@@ -121,15 +142,13 @@ class CivilScreen:
         frame_checks = tk.Frame(card, bg=CARD)
         frame_checks.grid(row=1, column=0, columnspan=2, sticky="w", pady=5)
 
-        for i, tipo in enumerate(tipos_disponiveis):
+        for tipo in tipos_disponiveis:
             var = tk.BooleanVar()
-            # IMPORTANTE: command=gui.atualizar_campos_extras_oc faz a mágica de aparecer os campos
             chk = tk.Checkbutton(frame_checks, text=tipo, variable=var, bg=CARD, 
-                                 activebackground=CARD, command=gui.atualizar_campos_extras_oc)
+                               activebackground=CARD, command=gui.atualizar_campos_extras_oc)
             chk.pack(side=tk.LEFT, padx=5)
             gui.tipos_selecionados[tipo] = var
 
-        # 2. Campos Fixos
         campos_fixos = [
             ("Descrição", "descricao"), ("Rua", "rua"), ("Bairro", "bairro"),
             ("Cidade", "cidade"), ("Estado", "estado"), ("Gravidade", "gravidade"),
@@ -143,22 +162,19 @@ class CivilScreen:
             ent.grid(row=i+2, column=1, pady=2, padx=10)
             gui.inputs_oc[chave] = ent
 
-        # 3. Frame para Campos Dinâmicos (Crime e Médico aparecem aqui)
         gui.frame_extra_oc = tk.Frame(card, bg=CARD)
         gui.frame_extra_oc.grid(row=10, columnspan=2, sticky="ew", pady=10)
-        gui.inputs_extras_oc = {}
 
-        # 4. Botão Finalizar
         tk.Button(card, text="Enviar Ocorrência", bg=PRIMARY, fg="white", relief=tk.FLAT,
                   command=gui.confirmar_ocorrencia, pady=10, cursor="hand2"
                   ).grid(row=11, columnspan=2, sticky="ew", pady=20)
 
     @staticmethod
     def render_listar_ocorrencias(gui, container):
-        PRIMARY = "#c53030"
-        BG = "#f4f7fb"
-        TEXT = "#243444"
-
+        """
+        Lista todas as ocorrências vinculadas ao cidadão logado.
+        Utiliza um Treeview para exibição tabular com suporte a rolagem.
+        """
         tk.Label(container, text="MINHAS OCORRÊNCIAS", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
         
         minhas_ocs = [oc for oc in gui.db["ocorrencias"] if oc.civil == gui.usuario_logado]
@@ -174,8 +190,10 @@ class CivilScreen:
         colunas = ("id", "data", "tipo", "status", "gravidade")
         tabela = ttk.Treeview(frame_tabela, columns=colunas, show="headings", height=15)
         
-        tabela.heading("id", text="ID"); tabela.heading("data", text="Data/Hora")
-        tabela.heading("tipo", text="Tipo"); tabela.heading("status", text="Status")
+        tabela.heading("id", text="ID")
+        tabela.heading("data", text="Data/Hora")
+        tabela.heading("tipo", text="Tipo")
+        tabela.heading("status", text="Status")
         tabela.heading("gravidade", text="Gravidade")
 
         tabela.column("id", width=50, anchor="center")
@@ -190,8 +208,6 @@ class CivilScreen:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         tk.Button(container, text="Ver Detalhes da Ocorrência Selecionada", 
-        bg=PRIMARY, fg="white", relief=tk.FLAT, pady=10,
-        command=lambda: gui.exibir_detalhes_oc_selecionada(tabela, minhas_ocs)
-        ).pack(pady=20)
-    
-    
+                bg=PRIMARY, fg="white", relief=tk.FLAT, pady=10, cursor="hand2",
+                command=lambda: gui.exibir_detalhes_oc_selecionada(tabela, minhas_ocs)
+                ).pack(pady=20)
