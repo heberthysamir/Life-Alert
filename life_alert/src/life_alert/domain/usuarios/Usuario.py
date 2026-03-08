@@ -1,6 +1,16 @@
 class Usuario:
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, tipo):
         self.id = None
+        # validações básicas para encapsulamento
+        if not nome:
+            raise ValueError("Nome é obrigatório")
+        if not cpf:
+            raise ValueError("CPF é obrigatório")
+        if not email:
+            raise ValueError("E-mail é obrigatório")
+        if not senha:
+            raise ValueError("Senha é obrigatória")
+
         self.nome = nome
         self.cpf = cpf
         self.telefone = telefone

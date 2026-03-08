@@ -74,8 +74,13 @@ class LifeAlertGUI:
 
     # --- LÓGICA DE AUTENTICAÇÃO E CADASTRO ---
     def executar_login(self):
-        email = self.ent_login_email.get()
-        senha = self.ent_login_senha.get()
+        email = self.ent_login_email.get().strip()
+        senha = self.ent_login_senha.get().strip()
+        
+        # validação simples de campos
+        if not email or not senha:
+            messagebox.showwarning("Aviso", "Por favor, informe e-mail e senha.")
+            return
         
         # Buscar usuário no banco de dados via repositório
         usuario = self.usuario_repo.buscarPorCredenciais(email, senha)
@@ -89,13 +94,25 @@ class LifeAlertGUI:
 
     def executar_cadastro(self):
         try:
-            dados = {k.lower(): v.get() for k, v in self.cad_inputs.items()}
+            dados = {k.lower(): v.get().strip() for k, v in self.cad_inputs.items()}
             dados["num"] = dados.pop("número")
             
+            # validação de campos obrigatórios
+            obrigatorios = ["nome","cpf","email","senha","cidade","bairro","rua","num","estado"]
+            for campo in obrigatorios:
+                if not dados.get(campo):
+                    raise ValueError(f"O campo '{campo}' é obrigatório.")
+
             if self.tipo_selecionado == "2":
-                dados["turno"] = self.ent_extra.get()
+                turno_val = self.ent_extra.get().strip()
+                if not turno_val:
+                    raise ValueError("Turno é obrigatório para atendentes.")
+                dados["turno"] = turno_val
             elif self.tipo_selecionado == "3":
-                dados["cargo"] = self.ent_extra.get()
+                cargo_val = self.ent_extra.get().strip()
+                if not cargo_val:
+                    raise ValueError("Cargo é obrigatório para agentes.")
+                dados["cargo"] = cargo_val
                 dados["status"] = True
 
             novo_usuario = UsuarioFactory.criar(self.tipo_selecionado, **dados)
@@ -389,7 +406,6 @@ class LifeAlertGUI:
                     tk.Label(card, text=f"{label}:", bg=CARD, font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5)
                     tk.Label(card, text=valor, bg=CARD, font=("Segoe UI", 10), wraplength=400, justify="left").grid(row=i, column=1, sticky="w", padx=10, pady=5)
 
-                # Informações do Atendimento (se houver)
                 atendimento = next((a for a in self.db.get("atendimentos", []) if a.ocorrencia == oc), None)
                 if atendimento:
                     tk.Frame(card, height=1, bg=BG).grid(row=len(info), columnspan=2, sticky="ew", pady=10)
@@ -397,8 +413,8 @@ class LifeAlertGUI:
                     
                     at_info = [
                         ("Atendente", atendimento.atendente.nome),
-                        ("Início", atendimento.horaInicio), # Atributo da sua classe
-                        ("Urgência", atendimento.grauUrgencia) # Atributo da sua classe
+                        ("Início", atendimento.horaInicio), 
+                        ("Urgência", atendimento.grauUrgencia)
                     ]
                     
                     for i, (label, valor) in enumerate(at_info):
@@ -472,8 +488,7 @@ class LifeAlertGUI:
         at_obj = next((a for a in lista_atendimentos if a.id == id_at), None)
 
         if at_obj:
-            # Se você quiser apenas mudar a urgência como no seu método atualizarAtendimento:
-            novo_grau = "alta" # Exemplo: você pode abrir um simpledialog para isso
+            novo_grau = "alta"
             at_obj.alterarUrgencia(novo_grau)
             
             # Se o objetivo for finalizar o atendimento:
@@ -488,21 +503,17 @@ class LifeAlertGUI:
                 messagebox.showwarning("Aviso", "Selecione um atendimento na lista!")
                 return
 
-            # Pega o ID da linha selecionada
             valores = tabela.item(item_selecionado)['values']
             id_at = valores[0]
             
-            # Busca o objeto Atendimento correspondente
             atendimento = next((at for at in lista_ats if at.id == id_at), None)
             
             if atendimento:
                 from infrastructure.api.screens.atendenteScreen import AtendenteScreen
-                # Abre a tela de detalhes e despacho que criamos
                 AtendenteScreen.render_analisar_atendimento(self, atendimento, self.area_conteudo)
 
     def processar_despacho_final(self, atendimento):
         try:
-            # Coleta dados da interface (Comboboxes e Text)
             urgencia = self.ent_urgencia.get()
             relatorio = self.txt_relatorio.get("1.0", tk.END).strip()
             idx_equipe = self.ent_equipe_resgate.current()
@@ -511,18 +522,15 @@ class LifeAlertGUI:
                 messagebox.showwarning("Aviso", "Preencha a urgência e selecione uma equipe!")
                 return
 
-            # 1. Atualiza atributos do atendimento
             atendimento.grauUrgencia = urgencia
             atendimento.ocorrencia.complemento = relatorio
             
-            # 2. Lógica de Resgate - buscar equipe do banco
             equipes = self.equipe_repo.listarTodos()
             if idx_equipe >= len(equipes):
                 raise Exception("Equipe inválida.")
             
             equipe_sel = equipes[idx_equipe]
             
-            # Atualiza status da equipe
             if hasattr(equipe_sel, 'agentes'):
                 for agente in equipe_sel.agentes:
                     agente.status = "Em ocorrência"
@@ -534,7 +542,6 @@ class LifeAlertGUI:
             atendimento.ocorrencia.status = "Encaminhada para Resgate"
             self.ocorrencia_repo.salvar(atendimento.ocorrencia)
 
-            # 3. Finaliza e salva o atendimento no banco
             atendimento.finalizarAtendimento([])
             self.atendimento_repo.salvar(atendimento)
 
@@ -614,9 +621,6 @@ class LifeAlertGUI:
             id_oc = int(oc_str.split(" - ")[0])
             oc = next(o for o in self.db["ocorrencias"] if o.id == id_oc)
             
-            # Aqui você chamaria sua VitimaFactory.criar(...)
-            # nova_v = VitimaFactory.criar(nome, "N/A", situacao, oc)
-            # self.db["vitimas"].append(nova_v)
             
             messagebox.showinfo("Sucesso", f"Vítima {nome} vinculada à ocorrência #{id_oc}")
             self.mostrar_dashboard()

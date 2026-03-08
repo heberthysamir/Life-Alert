@@ -20,10 +20,3 @@ class Atendente(Usuario):
             print(f" - {vitima.nome}")
             print(f"   Idade: {vitima.idade}")
             print(f"   Situação: {vitima.situacao}")
-
-    def encaminharResgate():
-        pass
-
-    def emitirAlerta():
-        pass
-

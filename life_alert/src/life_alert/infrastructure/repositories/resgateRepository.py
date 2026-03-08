@@ -1,5 +1,5 @@
-from ..database.connection import getDbConnection
-from ...domain.Resgate import Resgate
+from infrastructure.database.connection import getDbConnection
+from domain.Resgate import Resgate
 
 
 class ResgateRepository:

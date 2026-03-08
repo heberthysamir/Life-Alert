@@ -1,5 +1,5 @@
-from ..database.connection import getDbConnection
-from ...domain.Alerta import Alerta
+from infrastructure.database.connection import getDbConnection
+from domain.Alerta import Alerta
 
 
 class AlertaRepository:

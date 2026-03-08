@@ -1,4 +1,4 @@
-from ..database.connection import getDbConnection
+from infrastructure.database.connection import getDbConnection
 
 
 class EquipeRepository:

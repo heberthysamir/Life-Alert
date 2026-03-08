@@ -1,5 +1,5 @@
-from ..database.connection import getDbConnection
-from ...domain.Atendimento import Atendimento
+from infrastructure.database.connection import getDbConnection
+from domain.Atendimento import Atendimento
 from datetime import datetime
 
 

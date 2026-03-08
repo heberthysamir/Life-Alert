@@ -1,7 +1,7 @@
-from ..database.connection import getDbConnection
-from ...domain.ocorrencias.Ocorrencia import Ocorrencia
-from ...domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
-from ...domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
+from infrastructure.database.connection import getDbConnection
+from domain.ocorrencias.Ocorrencia import Ocorrencia
+from domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
+from domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
 from datetime import datetime
 
 

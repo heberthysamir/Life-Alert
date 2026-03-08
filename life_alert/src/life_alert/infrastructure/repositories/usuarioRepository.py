@@ -1,7 +1,7 @@
-from ..database.connection import getDbConnection
-from ...domain.usuarios.UsuarioCivil import Civil
-from ...domain.usuarios.UsuarioAtendente import Atendente
-from ...domain.usuarios.UsuarioAgente import Agente
+from infrastructure.database.connection import getDbConnection
+from domain.usuarios.UsuarioCivil import Civil
+from domain.usuarios.UsuarioAtendente import Atendente
+from domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioRepository:
     def salvar(self, usuario):

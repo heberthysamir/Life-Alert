@@ -1,5 +1,5 @@
-from ..database.connection import getDbConnection
-from ...domain.Vitima import Vitima
+from infrastructure.database.connection import getDbConnection
+from domain.Vitima import Vitima
 
 
 class VitimaRepository:

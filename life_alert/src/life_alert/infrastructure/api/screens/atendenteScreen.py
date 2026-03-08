@@ -110,11 +110,9 @@ class AtendenteScreen:
 
         tk.Label(container, text="ANÁLISE E DESPACHO DE OCORRÊNCIA", font=gui.font_header, bg="#f4f7fb", fg="#2b6cb0").pack(pady=20)
         
-        # Grid principal para dividir detalhes da ocorrência e formulário de despacho
         main_frame = tk.Frame(container, bg="#f4f7fb")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20)
 
-        # COLUNA ESQUERDA: Detalhes (Ocorrência + Civil)
         left_col = tk.Frame(main_frame, bg="#ffffff", padx=15, pady=15, relief=tk.RIDGE, borderwidth=1)
         left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
 
@@ -126,26 +124,22 @@ class AtendenteScreen:
             (f"Descrição: {atendimento.ocorrencia.descricao}"),
             (f"Gravidade Relatada: {atendimento.ocorrencia.gravidade}")
         ]
-        # Adiciona campos dinâmicos se existirem
         if hasattr(atendimento.ocorrencia, 'sintomas'): detalhes.append(f"Sintomas: {atendimento.ocorrencia.sintomas}")
         if hasattr(atendimento.ocorrencia, 'tipoCrime'): detalhes.append(f"Crime: {atendimento.ocorrencia.tipoCrime}")
         
         for info in detalhes:
             tk.Label(left_col, text=info, bg="#ffffff", wraplength=350, justify="left").pack(anchor="w", pady=2)
 
-        # COLUNA DIREITA: Ações do Atendente
         right_col = tk.Frame(main_frame, bg="#ffffff", padx=15, pady=15, relief=tk.RIDGE, borderwidth=1)
         right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10)
 
         tk.Label(right_col, text="DEFINIÇÕES TÉCNICAS", font=("Segoe UI", 10, "bold"), bg="#ffffff").pack(anchor="w")
 
-        # 1. Definir Grau de Urgência
         tk.Label(right_col, text="Grau de Urgência Real:", bg="#ffffff").pack(anchor="w", pady=(10,0))
         gui.ent_urgencia = ttk.Combobox(right_col, values=["baixa", "média", "alta"], state="readonly")
         gui.ent_urgencia.set(atendimento.grauUrgencia)
         gui.ent_urgencia.pack(fill=tk.X, pady=5)
 
-        # 2. Selecionar Equipe (Para o Resgate)
         tk.Label(right_col, text="Designar Equipe de Resgate:", bg="#ffffff").pack(anchor="w", pady=(10,0))
         equipes_todas = gui.db.get("equipes", [])
 
@@ -178,7 +172,6 @@ class AtendenteScreen:
         main_frame = tk.Frame(container, bg="#f4f7fb")
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20)
 
-        # --- COLUNA ESQUERDA: Membros Atuais ---
         left_col = tk.Frame(main_frame, bg="white", padx=15, pady=15, relief=tk.RIDGE, borderwidth=1)
         left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
         
@@ -188,17 +181,14 @@ class AtendenteScreen:
             f = tk.Frame(left_col, bg="white")
             f.pack(fill=tk.X, pady=2)
             tk.Label(f, text=f"{agente.nome} ({agente.cargo})", bg="white").pack(side=tk.LEFT)
-            # Botão Remover (Lógica cmd == "2" do seu terminal)
             tk.Button(f, text="X", fg="red", bg="white", relief=tk.FLAT,
                       command=lambda a=agente: gui.logica_remover_agente(gui, container, equipe, a)).pack(side=tk.RIGHT)
 
-        # --- COLUNA DIREITA: Adicionar Novos (Lógica cmd == "1") ---
         right_col = tk.Frame(main_frame, bg="white", padx=15, pady=15, relief=tk.RIDGE, borderwidth=1)
         right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=10)
         
         tk.Label(right_col, text="Agentes Disponíveis", font=("Segoe UI", 10, "bold"), bg="white").pack()
 
-        # Filtra usuários que são Agentes e NÃO estão nesta equipe
         todos_usuarios = gui.db.get("usuarios", [])
         disponiveis = [u for u in todos_usuarios if u.tipo == "Agente" and u not in equipe.agentes]
 
@@ -216,13 +206,13 @@ class AtendenteScreen:
 
     @staticmethod
     def logica_adicionar_agente(gui, container, equipe, agente):
-        equipe.adicionar_membro(agente) # Usa o método da sua classe Equipe
+        equipe.adicionar_membro(agente) 
         messagebox.showinfo("Sucesso", f"{agente.nome} adicionado à equipe!")
         gui.render_gerenciar_membros_equipe(gui, container, equipe)
 
     @staticmethod
     def logica_remover_agente(gui, container, equipe, agente):
         if messagebox.askyesno("Confirmar", f"Remover {agente.nome} da equipe?"):
-            equipe.remover_membro(agente.id) # Usa o método da sua classe Equipe
+            equipe.remover_membro(agente.id) 
             messagebox.showinfo("Sucesso", "Membro removido.")
             gui.render_gerenciar_membros_equipe(gui, container, equipe)

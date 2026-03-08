@@ -1,5 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import sys
+import os
+
+# Permitir execução como script direto (para debug)
+if __name__ == "__main__":
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    life_alert_root = os.path.join(current_dir, '../../..')
+    if life_alert_root not in sys.path:
+        sys.path.insert(0, life_alert_root)
+
 from application.equipeFactory import EquipeFactory
 from application.vitimaFactory import VitimaFactory
 
@@ -391,5 +401,3 @@ class AgenteScreen:
             # Executa a lógica de encerramento enviando o relato e o total
             gui.logica_concluir_resgate_direto(ocorrencia, relato, total)
 
-        tk.Button(card, text="CONCLUIR E LIBERAR EQUIPE", bg="#2f855a", fg="white", 
-                  font=("Segoe UI", 10, "bold"), command=confirmar, pady=10).pack(fill=tk.X, pady=10)
