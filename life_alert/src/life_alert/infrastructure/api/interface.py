@@ -9,6 +9,7 @@ from application.usuariosFactory import UsuarioFactory
 from application.ocorrenciaFactory import OcorrenciaFactory
 from application.perfilMedicoFactory import PerfilMedicoFactory
 from application.alertasFactory import AlertaFactory
+from application.vitimaFactory import VitimaFactory
 from infrastructure.api.screens.authScreen import AuthScreen
 from infrastructure.api.screens.civilSreen import CivilScreen
 from infrastructure.api.screens.atendenteScreen import AtendenteScreen
@@ -54,25 +55,25 @@ class LifeAlertGUI:
         self.main_container = tk.Frame(self.root, bg=BG)
         self.main_container.pack(fill=tk.BOTH, expand=True)
 
-        # Inicia pela tela de login (agora externa)
         AuthScreen.render_login(self)
 
+    # Remove todos os widgets presentes no container principal
     def limpar_tela(self):
         for widget in self.main_container.winfo_children():
             widget.destroy()
 
-    # --- NAVEGAÇÃO E TRANSIÇÕES ---
+    # Reseta o estado do usuário e renderiza a tela de login
     def mostrar_tela_login(self):
         self.usuario_logado = None
         AuthScreen.render_login(self)
 
+    # Limpa a área de conteúdo dinâmico e executa o comando da nova tela
     def preparar_e_executar(self, comando):
-        """Limpa apenas a área de conteúdo antes de carregar uma nova função"""
         for widget in self.area_conteudo.winfo_children():
             widget.destroy()
         comando(self.area_conteudo)
 
-    # --- LÓGICA DE AUTENTICAÇÃO E CADASTRO ---
+    # Valida as credenciais e redireciona o usuário para o dashboard
     def executar_login(self):
         email = self.ent_login_email.get().strip()
         senha = self.ent_login_senha.get().strip()
@@ -92,6 +93,7 @@ class LifeAlertGUI:
         else:
             messagebox.showerror("Erro", "E-mail ou senha incorretos.")
 
+    # Processa os dados do formulário e cria um novo usuário via Factory
     def executar_cadastro(self):
         try:
             dados = {k.lower(): v.get().strip() for k, v in self.cad_inputs.items()}
@@ -124,16 +126,14 @@ class LifeAlertGUI:
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao cadastrar: {e}")
 
-    # --- DASHBOARD PRINCIPAL ---
+    # Renderiza a estrutura principal com sidebar e área de alertas do usuário
     def mostrar_dashboard(self):
         self.limpar_tela()
         
-        # Sidebar (Esquerda)
         sidebar = tk.Frame(self.main_container, bg=CARD, width=250)
         sidebar.pack(side="left", fill="y")
         sidebar.pack_propagate(False)
 
-        # Conteúdo (Direita) 
         self.area_conteudo = tk.Frame(self.main_container, bg=BG)
         self.area_conteudo.pack(side="right", fill="both", expand=True)
         header_frame = tk.Frame(self.area_conteudo, bg=BG)
@@ -144,8 +144,6 @@ class LifeAlertGUI:
         tk.Label(header_frame, text=f"Resumo de alertas para {self.usuario_logado.bairro}, {self.usuario_logado.cidade}:", 
                  font=("Segoe UI", 10), bg=BG, fg=MUTED, anchor="w").pack(fill=tk.X)
 
-        # 2. Chamada automática dos Alertas
-        # Criamos um sub-container para os alertas para não bagunçar o layout
         alertas_container = tk.Frame(self.area_conteudo, bg=BG)
         alertas_container.pack(fill=tk.BOTH, expand=True, padx=20)
         CivilScreen.render_lista_alertas(self, alertas_container)
@@ -166,62 +164,63 @@ class LifeAlertGUI:
                                          font=self.font_header, bg=BG, fg=MUTED)
         self.label_boas_vindas.pack(pady=100)
 
-    #Telas do civil
+    # Renderiza a lista de alertas ativos na tela do cidadão
     def tela_central_alertas(self, container):
         CivilScreen.render_lista_alertas(self,container)
+
+    # Renderiza o formulário para abertura de novas ocorrências
     def tela_criar_ocorrencia(self, container):
         CivilScreen.render_criar_ocorrencia(self, container)
 
+    # Renderiza o histórico de ocorrências registradas pelo usuário
     def tela_listar_ocorrencias(self, container):
         CivilScreen.render_listar_ocorrencias(self, container)
 
+    # Renderiza o formulário de informações médicas do cidadão
     def tela_perfil_medico(self, container):
         CivilScreen.render_perfil_medico(self, container)
 
+    # Renderiza a tela de edição de informações do perfil logado
     def tela_atualizar_dados(self, container):
         CivilScreen.render_atualizar_dados(self, container)
 
+    # Renderiza a confirmação de encerramento definitivo da conta
     def tela_excluir_conta(self, container):
         CivilScreen.render_excluir_conta(self, container)
-    
-    def tela_criar_ocorrencia(self, container):
-        CivilScreen.render_criar_ocorrencia(self, container)
 
-    def tela_listar_ocorrencias(self, container):
-        CivilScreen.render_listar_ocorrencias(self, container)
-
-    #Telas do Atendente
+    # Renderiza a lista de ocorrências pendentes para o atendente
     def tela_gerenciar_atendimentos(self, container):
         AtendenteScreen.render_gerenciar_atendimentos(self, container)
 
+    # Renderiza o painel de disparo de alertas de emergência
     def tela_painel_alertas(self, container):
         AtendenteScreen.render_painel_alertas(self, container)
     
-    # --- PONTES PARA O AGENTE ---
+    # Renderiza a gestão de vítimas para o agente de campo
     def tela_gerenciar_vitimas(self, container):
-        from infrastructure.api.screens.agenteScreen import AgenteScreen
         AgenteScreen.render_gerenciar_vitimas(self, container)
 
+    # Renderiza o formulário de cadastro de nova vítima em um resgate
     def tela_cadastrar_vitima(self, container):
-        from infrastructure.api.screens.agenteScreen import AgenteScreen
         AgenteScreen.render_cadastrar_vitima(self, container)
 
+    # Renderiza a criação de novas equipes de resposta
     def tela_criar_equipe(self, container):
-        from infrastructure.api.screens.agenteScreen import AgenteScreen
         AgenteScreen.render_criar_equipe(self, container)
 
+    # Renderiza o menu de gestão de equipes existentes
     def tela_menu_equipe(self, container):
-        from infrastructure.api.screens.agenteScreen import AgenteScreen
         AgenteScreen.render_menu_equipes(self, container)
 
+    # Renderiza a tela de visualização de relatórios e estatísticas
     def tela_relatorios(self, container):
-        from infrastructure.api.screens.agenteScreen import AgenteScreen
         AgenteScreen.render_relatorios(self, container)
     
+    # Renderiza o painel de controle de ocorrências em tempo real para o agente
     def tela_painel_operacional(self, container):
-        from infrastructure.api.screens.agenteScreen import AgenteScreen
         AgenteScreen.render_painel_operacional(self, container)
 
+    # Gera campos dinâmicos no formulário baseados no tipo de ocorrência selecionado
     def atualizar_campos_extras_oc(self):
         for widget in self.frame_extra_oc.winfo_children():
             widget.destroy()
@@ -242,21 +241,21 @@ class LifeAlertGUI:
             tk.Label(self.frame_extra_oc, text="ℹ️ Seu perfil médico será enviado automaticamente.", 
                      fg="#6b7280", bg="#ffffff", font=("Segoe UI", 8, "italic")).grid(row=linha, columnspan=2)
 
+    # Cria um par de label e entrada para o formulário de ocorrências
     def criar_campo_extra(self, label, chave, row):
         tk.Label(self.frame_extra_oc, text=f"{label}:", bg="#ffffff").grid(row=row, column=0, sticky="w", pady=2)
         ent = ttk.Entry(self.frame_extra_oc, width=33)
         ent.grid(row=row, column=1, pady=2, padx=10)
         self.inputs_extras_oc[chave] = ent
 
+    # Valida, cria a ocorrência e designa um atendente automaticamente
     def confirmar_ocorrencia(self):
-        # 1. Validação de seleção
         selecionados = [tipo for tipo, var in self.tipos_selecionados.items() if var.get()]
         
         if not selecionados:
             messagebox.showwarning("Aviso", "Selecione pelo menos um tipo de ocorrência!")
             return
 
-        # 2. Lógica de Perfil Médico (Sua lógica original preservada)
         dados_perfil = None
         if "Médica" in selecionados:
             perfil = getattr(self.usuario_logado, 'perfil_medico', None)
@@ -269,11 +268,9 @@ class LifeAlertGUI:
                 dados_perfil = str(perfil)
 
         try:
-            # 3. Coleta de dados dos inputs
             dados = {k: v.get() for k, v in self.inputs_oc.items()}
             dados.update({k: v.get() for k, v in self.inputs_extras_oc.items()})
             
-            # Definição do ID do Tipo para a Factory
             mapa_map = {"Policial": "1", "Médica": "2", "Incêndio": "3", "Enchente": "4", "Outros": "5"}
             id_tipo_principal = "2" if "Médica" in selecionados else mapa_map[selecionados[0]]
 
@@ -289,11 +286,9 @@ class LifeAlertGUI:
                 "equipe": None,
             })
 
-            # 5. Criação e salvamento da Ocorrência no banco de dados
             nova_oc = OcorrenciaFactory.criar(id_tipo_principal, **dados)
             self.ocorrencia_repo.salvar(nova_oc)
 
-            # 6. INTEGRAÇÃO: DESIGNAR ATENDENTE AUTOMATICAMENTE
             from application.atendimentoService import AtendimentoService
             atendentes = self.usuario_repo.listarTodos()
             atendente_escolhido = AtendimentoService.designarAtendente(
@@ -303,7 +298,6 @@ class LifeAlertGUI:
             )
 
             if atendente_escolhido:
-                # Criar e salvar o objeto Atendimento no banco de dados
                 novo_atendimento = Atendimento(
                     atendente=atendente_escolhido,
                     ocorrencia=nova_oc,
@@ -325,6 +319,7 @@ class LifeAlertGUI:
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao registrar ocorrência: {e}")
 
+    # Coleta os novos dados da interface e atualiza o objeto do usuário logado
     def confirmar_atualizacao(self):
         try:
             self.usuario_logado.atualizarUsuario(
@@ -345,6 +340,7 @@ class LifeAlertGUI:
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao atualizar: {e}")
 
+    # Remove o usuário do banco de dados e retorna à tela de login
     def confirmar_exclusao(self):
         if messagebox.askyesno("Confirmar", "Tem certeza que deseja excluir sua conta permanentemente?"):
             sucesso = self.usuario_repo.excluir(self.usuario_logado.cpf)
@@ -354,23 +350,21 @@ class LifeAlertGUI:
             else:
                 messagebox.showerror("Erro", "Não foi possível excluir a conta.")
                 
+    # Localiza uma ocorrência selecionada e exibe todos os seus atributos detalhados
     def exibir_detalhes_oc_selecionada(self, tabela, lista_ocs):
             item_selecionado = tabela.selection()
             if not item_selecionado:
                 messagebox.showwarning("Aviso", "Selecione uma ocorrência na lista primeiro!")
                 return
 
-            # Busca o objeto original
             valores = tabela.item(item_selecionado)['values']
             id_oc = valores[0]
             oc = next((o for o in lista_ocs if o.id == id_oc), None)
             
             if oc:
-                # Limpa o container para desenhar os detalhes
                 for widget in self.area_conteudo.winfo_children():
                     widget.destroy()
 
-                # Título e Botão Voltar
                 header_frame = tk.Frame(self.area_conteudo, bg=BG)
                 header_frame.pack(fill=tk.X, padx=20, pady=10)
                 
@@ -380,7 +374,6 @@ class LifeAlertGUI:
                 tk.Label(self.area_conteudo, text=f"DETALHES DA OCORRÊNCIA #{oc.id}", 
                         font=self.font_header, bg=BG, fg=PRIMARY).pack(pady=10)
 
-                # Card de Informações
                 card = tk.Frame(self.area_conteudo, bg=CARD, padx=30, pady=20)
                 card.pack(pady=10, padx=50, fill=tk.BOTH)
 
@@ -393,7 +386,6 @@ class LifeAlertGUI:
                     ("Gravidade", oc.gravidade)
                 ]
 
-                # Adiciona informações dinâmicas (Crime/Médico)
                 if hasattr(oc, 'tipoCrime') and oc.tipoCrime:
                     info.append(("Tipo de Crime", oc.tipoCrime))
                 if hasattr(oc, 'sintomas') and oc.sintomas:
@@ -401,7 +393,6 @@ class LifeAlertGUI:
                 if hasattr(oc, 'perfilMedico') and oc.perfilMedico:
                     info.append(("Perfil Médico", oc.perfilMedico))
 
-                # Renderiza os labels no card
                 for i, (label, valor) in enumerate(info):
                     tk.Label(card, text=f"{label}:", bg=CARD, font=("Segoe UI", 10, "bold")).grid(row=i, column=0, sticky="w", pady=5)
                     tk.Label(card, text=valor, bg=CARD, font=("Segoe UI", 10), wraplength=400, justify="left").grid(row=i, column=1, sticky="w", padx=10, pady=5)
@@ -422,9 +413,9 @@ class LifeAlertGUI:
                         tk.Label(card, text=f"{label}:", bg=CARD, font=("Segoe UI", 10, "bold")).grid(row=row, column=0, sticky="w", pady=5)
                         tk.Label(card, text=valor, bg=CARD).grid(row=row, column=1, sticky="w", padx=10)
     
+    # Cria ou atualiza as informações de saúde vinculadas ao usuário logado
     def salvar_perfil_medico(self):
         try:
-
             dados = {
                 "alergias": self.inputs_perfil["alergias"].get(),
                 "doencas": self.inputs_perfil["doencas"].get(),
@@ -438,11 +429,12 @@ class LifeAlertGUI:
             self.usuario_repo.salvar(self.usuario_logado)
             
             messagebox.showinfo("Sucesso", "Perfil médico atualizado com sucesso!")
-            self.mostrar_dashboard() # Volta para a tela inicial do sistema
+            self.mostrar_dashboard()
             
         except Exception as e:
             messagebox.showerror("Erro", f"Não foi possível salvar o perfil: {e}")
     
+    # Processa os dados da interface e gera um novo alerta público no banco
     def logica_emitir_alerta(self):
         try:
             idx_combo = self.combo_oc_alerta.current()
@@ -477,6 +469,7 @@ class LifeAlertGUI:
             self.alerta_repo.excluir(id_alerta)
             self.mostrar_dashboard()
 
+    # Altera propriedades de um atendimento selecionado ou encerra seu ciclo básico
     def logica_atualizar_atendimento(self, tabela, lista_atendimentos):
         item_selecionado = tabela.selection()
         if not item_selecionado:
@@ -490,13 +483,12 @@ class LifeAlertGUI:
         if at_obj:
             novo_grau = "alta"
             at_obj.alterarUrgencia(novo_grau)
-            
-            # Se o objetivo for finalizar o atendimento:
             at_obj.encerrarAtendimento()
             
             messagebox.showinfo("Sucesso", "Atendimento atualizado!")
             self.mostrar_dashboard()
 
+    # Localiza o objeto de atendimento e chama a interface de análise técnica
     def preparar_analise_atendimento(self, tabela, lista_ats):
             item_selecionado = tabela.selection()
             if not item_selecionado:
@@ -512,6 +504,7 @@ class LifeAlertGUI:
                 from infrastructure.api.screens.atendenteScreen import AtendenteScreen
                 AtendenteScreen.render_analisar_atendimento(self, atendimento, self.area_conteudo)
 
+    # Define urgência, vincula equipe e encerra a fase de triagem da ocorrência
     def processar_despacho_final(self, atendimento):
         try:
             urgencia = self.ent_urgencia.get()
@@ -551,11 +544,10 @@ class LifeAlertGUI:
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao processar despacho: {e}")
 
+    # Atualiza o status da ocorrência e de sua equipe para o início das atividades de campo
     def logica_iniciar_resgate_direto(self, ocorrencia, container):
-        """Altera o status da ocorrência para 'Em Resgate' e atualiza a tela"""
         try:
             ocorrencia.status = "Em Resgate"
-            # Se a equipe estiver vinculada, atualiza o status dela também
             if ocorrencia.equipe:
                 ocorrencia.equipe.status = "Em atendimento"
                 for agente in ocorrencia.equipe.agentes:
@@ -567,12 +559,12 @@ class LifeAlertGUI:
             
             messagebox.showinfo("Sucesso", f"Resgate iniciado para a Ocorrência #{ocorrencia.id}")
             
-            # Recarrega a tela atual para atualizar os botões
             from infrastructure.api.screens.agenteScreen import AgenteScreen
             AgenteScreen.render_painel_operacional(self, container)
         except Exception as e:
             messagebox.showerror("Erro", f"Não foi possível iniciar o resgate: {e}")
 
+    # Valida pendências, gera histórico e finaliza o ciclo de vida de uma ocorrência
     def logica_concluir_resgate_direto(self, ocorrencia, relato, total_vitimas):
         try:
             # 1. Validação de Vítimas Perdidas
@@ -594,7 +586,6 @@ class LifeAlertGUI:
             # Salvar resgate no banco de dados
             self.resgate_repo.salvar(novo_resgate)
 
-            # 3. Atualiza Status da Ocorrência e Equipe
             ocorrencia.status = "Finalizada"
             ocorrencia.hora_finalizado = agora 
             
@@ -613,9 +604,10 @@ class LifeAlertGUI:
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao fechar resgate: {e}")
             
+    # Cria uma nova instância de vítima vinculada a uma ocorrência e salva no banco
     def logica_salvar_vitima(self, nome, situacao, oc_str):
         if not nome or not situacao or not oc_str:
-            return messagebox.showerror("Erro", "Preencha todos os campos")
+            return messagebox.showerror("Erro", "Preencha todos os campos corretamente.")
         
         try:
             id_oc = int(oc_str.split(" - ")[0])
@@ -624,5 +616,8 @@ class LifeAlertGUI:
             
             messagebox.showinfo("Sucesso", f"Vítima {nome} vinculada à ocorrência #{id_oc}")
             self.mostrar_dashboard()
+            
+        except StopIteration:
+            messagebox.showerror("Erro", "Ocorrência selecionada não foi encontrada no sistema.")
         except Exception as e:
-            messagebox.showerror("Erro", str(e))
+            messagebox.showerror("Erro", f"Falha ao salvar vítima: {str(e)}")
