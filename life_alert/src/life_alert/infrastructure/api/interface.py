@@ -60,7 +60,7 @@ class LifeAlertGUI:
     def executar_login(self):
         email = self.ent_login_email.get()
         senha = self.ent_login_senha.get()
-        usuario = Usuario.Login(self.db["usuarios"], email, senha)
+        usuario = Usuario.login(self.db["usuarios"], email, senha)
 
         if usuario:
             self.usuario_logado = usuario

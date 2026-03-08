@@ -127,6 +127,17 @@ class Usuario:
             return False
         return self._senha == senha_tentativa
     
+    def login(lista_usuarios, email, senha):
+        """
+        Percorre a lista de objetos Usuario, verifica se o email coincide
+        e se a senha é válida. Retorna o objeto usuario se sucesso, senão None.
+        """
+        email_busca = email.strip().lower()
+        for u in lista_usuarios:
+            if u._email == email_busca and u.verificar_senha(senha):
+                return u
+        return None
+    
     def atualizarUsuario(self, novo_nome=None, novo_telefone=None, novo_email=None, nova_senha=None, nova_rua=None, novo_num=None, novo_bairro=None, nova_cidade=None, novo_estado=None):
         try:
             if novo_nome: 
