@@ -59,10 +59,13 @@ class LifeAlertGUI:
         email = self.ent_login_email.get()
         senha = self.ent_login_senha.get()
         
-        # Chama o método Login da classe Usuario (atualizado conforme sua solicitação anterior)
-        usuario = Usuario.Login(self.db["usuarios"], email, senha)
-
-        if usuario:
+        usuario = None
+        for u in self.db["usuarios"]:
+            if u.email == email.lower():
+                usuario = u
+                break
+        
+        if usuario and usuario.verificar_senha(senha):
             self.usuario_logado = usuario
             messagebox.showinfo("Sucesso", f"Bem-vindo, {usuario.nome}!")
             self.mostrar_dashboard()
