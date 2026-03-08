@@ -447,11 +447,10 @@ class LifeAlertGUI:
         if at_obj:
             # Se você quiser apenas mudar a urgência como no seu método atualizarAtendimento:
             novo_grau = "alta" # Exemplo: você pode abrir um simpledialog para isso
-            at_obj.grauUrgencia = novo_grau
+            at_obj.alterarUrgencia(novo_grau)
             
             # Se o objetivo for finalizar o atendimento:
-            at_obj.horaFinal = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            at_obj.ocorrencia.status = "Finalizado" # Ou o status que desejar
+            at_obj.encerrarAtendimento()
             
             messagebox.showinfo("Sucesso", "Atendimento atualizado!")
             self.mostrar_dashboard()

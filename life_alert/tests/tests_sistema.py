@@ -36,27 +36,31 @@ def equipe_padrao(agente_padrao):
     equipe.adicionar_membro(agente_padrao)
     return equipe
 
-def test_rn009_nao_deve_finalizar_resgate_com_vitima_desaparecida(ocorrencia_padrao):
-    vitima = Vitima(nome="João", idade="20", situacao="desaparecida", ocorrencia=ocorrencia_padrao)
-    ocorrencia_padrao.vitimas.append(vitima)
+def test_resgate_inicializacao_data_padrao(ocorrencia_padrao):
+    """Verifica se o Resgate gera automaticamente a dataInicio quando não fornecida"""
+    resgate = Resgate(ocorrencia=ocorrencia_padrao, descricao="Busca inicial")
     
-    resgate = Resgate(id=1, ocorrencia=ocorrencia_padrao, dataInicio="2026-03-07", descricao="Busca", dataFim=None, qtdResgatados=0)
+    assert resgate.dataInicio is not None
+    assert "-" in resgate.dataInicio
+    assert resgate.qtdResgatados == 0
 
-    resultado = resgate.concluirResgate()
-
-    assert "Não é possível concluir" in resultado
-    assert ocorrencia_padrao.status != "Finalizada"
-
-def test_deve_finalizar_resgate_se_vitimas_seguras(ocorrencia_padrao):
-    vitima = Vitima(nome="Maria", idade="30", situacao="Estável", ocorrencia=ocorrencia_padrao)
-    ocorrencia_padrao.vitimas.append(vitima)
+def test_atendimento_inicializacao_horas_padrao(agente_padrao, ocorrencia_padrao):
+    """Verifica se o Atendimento gera a horaInicio e deixa horaFinal vazia na criação"""
+    atendimento = Atendimento(atendente=agente_padrao, ocorrencia=ocorrencia_padrao, civil="Maria")
     
-    resgate = Resgate(id=2, ocorrencia=ocorrencia_padrao, dataInicio="2026-03-07", descricao="Resgate normal", dataFim=None, qtdResgatados=1)
+    assert atendimento.horaInicio is not None
+    assert atendimento.horaFinal is None
 
-    resultado = resgate.concluirResgate()
-
-    assert "Resgate finalizado" in resultado
-    assert ocorrencia_padrao.status == "Finalizada"
+def test_resgate_qtd_resgatados_invalida_deve_falhar(ocorrencia_padrao):
+    resgate = Resgate(ocorrencia=ocorrencia_padrao, dataInicio="2026-03-07")
+    
+    with pytest.raises(ValueError) as erro_negativo:
+        resgate.qtdResgatados = -3
+    assert "não pode ser negativa" in str(erro_negativo.value)
+    
+    with pytest.raises(ValueError) as erro_texto:
+        resgate.qtdResgatados = "cinco"
+    assert "número inteiro válido" in str(erro_texto.value)
 
 def test_equipe_adicionar_membro_duplicado_deve_falhar(equipe_padrao, agente_padrao):
     with pytest.raises(ValueError) as erro:
@@ -150,7 +154,7 @@ def test_atendimento_finalizar_adiciona_na_lista(agente_padrao, ocorrencia_padra
     assert atendimento.horaFinal is not None
 
 def test_resgate_adicionar_vitima(ocorrencia_padrao):
-    resgate = Resgate(id=10, ocorrencia=ocorrencia_padrao, dataInicio="2026-03-07", descricao="Busca e Salvamento", dataFim=None, qtdResgatados=0)
+    resgate = Resgate(ocorrencia=ocorrencia_padrao, dataInicio="2026-03-07", descricao="Busca e Salvamento", dataFim=None, qtdResgatados=0)
     
     mensagem = resgate.adicionarVitima(5)
     

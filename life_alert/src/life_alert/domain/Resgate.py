@@ -9,9 +9,34 @@ class Resgate:
         self.dataInicio = dataInicio or datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.descricao = descricao
         self.dataFim = dataFim
+        
         self.qtdResgatados = qtdResgatados
 
-    def finalizar(self, relato, total_vitimas):
-        self.descricao = relato
-        self.qtdResgatados = total_vitimas
-        self.dataFim = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Encapsulamento
+
+    @property
+    def qtdResgatados(self):
+        return self._qtdResgatados
+
+    @qtdResgatados.setter
+    def qtdResgatados(self, valor):
+        try:
+            qtd_int = int(valor)
+        except (ValueError, TypeError):
+            raise ValueError("Quantidade de resgatados deve ser um número inteiro válido.")
+            
+        if qtd_int < 0:
+            raise ValueError("Quantidade de resgatados não pode ser negativa.")
+            
+        self._qtdResgatados = qtd_int
+
+    def adicionarVitima(self, quantidade):
+        try:
+            qtd = int(quantidade)
+            if qtd < 0:
+                raise ValueError("A quantidade de vítimas não pode ser negativa.")
+            
+            self.qtdResgatados += qtd
+            return f"{qtd} vítima(s) adicionada(s) ao resgate com sucesso."
+        except ValueError as e:
+            raise ValueError(f"Valor inválido: {e}")

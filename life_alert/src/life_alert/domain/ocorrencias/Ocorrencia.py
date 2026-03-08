@@ -7,7 +7,6 @@ class Ocorrencia:
         self.agente = agente
         self.civil = civil
         self.dataHora = dataHora
-        self.status = status
         self.descricao = descricao
         self.rua = rua
         self.bairro = bairro
@@ -17,9 +16,36 @@ class Ocorrencia:
         self.tipo = tipo
         self.qtdAfetados = qtdAfetados
         self.equipe = None
+        
+        self.status = status
+
+    # Encapsulamento
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, novo_status):
+        status_permitidos = [
+            "Aberta", 
+            "Em Atendimento", 
+            "Encaminhada para Resgate", 
+            "Em Resgate", 
+            "Finalizada"
+        ]
+
+        mapa_status = {s.lower(): s for s in status_permitidos}
+        status_lapidado = str(novo_status).strip().lower()
+
+        if status_lapidado not in mapa_status:
+            raise ValueError(f"Status deve ser um dos seguintes: {', '.join(status_permitidos)}.")
+
+        self._status = mapa_status[status_lapidado]
 
     def __str__(self):
-        return f"[{self.id}] {self.tipo} - Status: {self.status}\nDescrição: {self.descricao} \nHorário: {self.dataHora}\nGravidade: {self.gravidade}\nQuantidade de afetados: {self.qtdAfetados}\nEndereço: {self.rua},{self.bairro} - {self.complemento}\n"
+        complemento = getattr(self, 'complemento', 'Sem complemento')
+        return f"[{self.id}] {self.tipo} - Status: {self.status}\nDescrição: {self.descricao} \nHorário: {self.dataHora}\nGravidade: {self.gravidade}\nQuantidade de afetados: {self.qtdAfetados}\nEndereço: {self.rua},{self.bairro} - {complemento}\n"
     
     @staticmethod
     def listarOcorrencias(lista_ocorrencias):

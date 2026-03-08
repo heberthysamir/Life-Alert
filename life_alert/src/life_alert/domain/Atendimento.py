@@ -60,6 +60,18 @@ class Atendimento:
         self.grauUrgencia = novo_grau
         print("✅ Dados do atendimento atualizados com sucesso!")
 
+    def alterarUrgencia(self):
+        print(f"\nALTERANDO URGÊNCIA DO ATENDIMENTO #{self.id}")
+        print(f"Urgência atual: {self.grauUrgencia}")
+        novo_grau = input("Defina o novo grau de urgência (baixa/média/alta): ")
+        self.grauUrgencia = novo_grau
+        print("✅ Grau de urgência atualizado com sucesso!")
+
+    def encerrarAtendimento(self):
+        self.horaFinal = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if self.ocorrencia:
+            self.ocorrencia.status = "Finalizada"
+
     @staticmethod
     def listarAtendimentos(lista_atendimentos):
         print("\nAtendimentos Realizados:")
