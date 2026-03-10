@@ -63,8 +63,7 @@ life-alert
 |   |   |   |   ├── __init__.py
 |   |   |   |   └── interface.py
 |   |   |
-|   |   ├── main.py
-|   |   └── menu.py
+|   |   └── main.py
 |   ├── tests/
 |   |   ├── __init__.py
 |   |   └── tests_sistema.py
