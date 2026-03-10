@@ -1,8 +1,15 @@
 import re
 
 class Usuario:
+    """
+    Classe base para a hierarquia de usuários do sistema Life Alert.
+    Gerencia dados pessoais, validações de segurança (CPF, Email, Senha) 
+    e persistência básica de localização.
+    """
+    _id_auto = 1
     def __init__(self, nome, cpf, telefone, rua, num, bairro, cidade, estado, email, senha, tipo):
-        self.id = None
+        self.id = Usuario._id_auto
+        Usuario._id_auto += 1
         # validações básicas para encapsulamento
         if not nome:
             raise ValueError("Nome é obrigatório")
@@ -16,7 +23,7 @@ class Usuario:
         self.nome = nome
         self.telefone = telefone
         self.tipo = tipo
-        
+        # Atributos privados para os @property
         self._cpf = None
         self._email = None
         self._senha = None
@@ -25,7 +32,7 @@ class Usuario:
         self._bairro = None
         self._cidade = None
         self._estado = None
-        
+        # Uso dos setters para validação inicial
         self.cpf = cpf
         self.email = email
         self.senha = senha
@@ -122,6 +129,7 @@ class Usuario:
         return f"[{id_str}] {self.nome} - {self.tipo}."  
       
     def obter_funcionalidades(self):
+        """Retorna as ações disponíveis para este usuário na interface."""
         return [
             ("🔔 Ver Alertas", lambda container: self.gui_ref.tela_central_alertas(container)),
             ("👤 Atualizar Dados", lambda container: self.gui_ref.tela_atualizar_dados(container)),
@@ -129,18 +137,23 @@ class Usuario:
         ]
 
     
+    @staticmethod
     def login(lista_usuarios, email, senha):
         """
-        Percorre a lista de objetos Usuario, verifica se o email coincide
-        e se a senha é válida. Retorna o objeto usuario se sucesso, senão None.
+        Método de classe para autenticação.
+        Retorna o objeto Usuario se as credenciais forem válidas.
         """
         email_busca = email.strip().lower()
         for u in lista_usuarios:
-            if u._email == email_busca and u.verificar_senha(senha):
+            if u.email == email_busca and u.verificar_senha(senha):
                 return u
         return None
     
     def atualizarUsuario(self, novo_nome=None, novo_telefone=None, novo_email=None, nova_senha=None, nova_rua=None, novo_num=None, novo_bairro=None, nova_cidade=None, novo_estado=None):
+        """
+        Atualiza os campos fornecidos dinamicamente.
+        Exemplo: usuario.atualizarUsuario(novo_nome="João")
+        """
         if novo_nome: self.nome = novo_nome
         if novo_telefone: self.telefone = novo_telefone
         if novo_email: self.email = novo_email
@@ -151,3 +164,12 @@ class Usuario:
         if novo_bairro: self.bairro = novo_bairro
         if nova_cidade: self.cidade = nova_cidade
         if novo_estado: self.estado = novo_estado
+
+    def __str__(self):
+        """Representação para exibição em logs."""
+        id_display = self.id if self.id else "Novo"
+        return f"[{id_display}] {self.nome} ({self.tipo})"
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"Usuario(nome='{self.nome}', email='{self.email}', tipo='{self.tipo}')"

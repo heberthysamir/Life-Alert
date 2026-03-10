@@ -1,15 +1,18 @@
 class EquipeResgate:
+    """
+    Gerencia um grupo de Agentes operacionais destacados para uma localidade.
+    Controla a disponibilidade da equipe, sua especialidade (ex: Atendimento Pré-Hospitalar, 
+    Combate a Incêndio) e o setor de atuação.
+    """
     _id_auto = 1
-    
-    def __init__(self, agentes, localidade, status, setor, especialidade):
-        self.id = EquipeResgate._id_auto
-        EquipeResgate._id_auto += 1
-        self._agentes = []
+    def __init__(self, agentes, localidade, status, setor, especialidade,**kwargs):
+        self.id = kwargs.get('id', None)
+        self.agentes = agentes if agentes is not None else []
         self._localidade = None
         self._status = None
         self._setor = None
         self._especialidade = None
-        
+        # Atribuição via setters para validação
         self._agentes = agentes if agentes else []
         self.localidade = localidade
         self.status = status
@@ -19,6 +22,12 @@ class EquipeResgate:
     @property
     def agentes(self):
         return self._agentes.copy()
+    
+    @agentes.setter
+    def agentes(self, valor):
+        if not isinstance(valor, list):
+            raise ValueError("Agentes deve ser uma lista.")
+        self._agentes = valor
 
     @property
     def localidade(self):
@@ -35,16 +44,10 @@ class EquipeResgate:
         return self._status
     
     @status.setter
-    def status(self, novo_status):
-        status_permitidos = ["Disponível", "Em ocorrência", "Descansando"]
-        if isinstance(novo_status, str):
-            status_lapidado = novo_status.strip()
-            mapa_status = {s: s for s in status_permitidos}
-            if status_lapidado not in mapa_status:
-                raise ValueError(f"Status deve ser um dos seguintes: {', '.join(status_permitidos)}.")
-            self._status = mapa_status[status_lapidado]
-        else:
-            raise ValueError("Status deve ser uma string.")
+    def status(self, valor):
+        if not isinstance(valor, str) or not valor.strip():
+            raise ValueError("Status não pode ser vazio.")
+        self._status = valor.strip()
 
     @property
     def setor(self):
@@ -65,29 +68,13 @@ class EquipeResgate:
         if not isinstance(valor, str) or not valor.strip():
             raise ValueError("Especialidade não pode ser vazia.")
         self._especialidade = valor.strip()
-
-    def adicionar_membro(self, agente):
-        if agente in self._agentes:
-            raise ValueError(f"O agente {agente.nome} já está nesta equipe.")
-        self._agentes.append(agente)
-        return True
-
-    def remover_membro(self, id_agente):
-        agente = next((a for a in self._agentes if a.id == id_agente), None)
-        if not agente:
-            raise ValueError("Agente não encontrado nesta equipe.")
-        self._agentes.remove(agente)
-        return True
-
-    def alterar_status_agente(self, id_agente, novo_status):
-        agente = next((a for a in self._agentes if a.id == id_agente), None)
-        if not agente:
-            raise ValueError("Agente não encontrado.")
-        agente.status = novo_status
-        return True
-    
-    def obter_quantidade_agentes(self):
-        return len(self._agentes)
     
     def __str__(self):
-        return f"Equipe #{self.id} | Status: {self.status} | Setor: {self.setor} | Especialidade: {self.especialidade} | Agentes: {self.obter_quantidade_agentes()}"
+        """Representação para exibição em logs."""
+        return (f"Equipe #{self.id} | Status: {self.status} | "
+                f"Setor: {self.setor} | Especialidade: {self.especialidade} | "
+                f"Membros: {self.obter_quantidade_agentes()}")
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"EquipeResgate(id={self.id}, status='{self.status}', especialidade='{self.especialidade}')"

@@ -1,7 +1,7 @@
-from life_alert.infrastructure.database.connection import getDbConnection
-from life_alert.domain.usuarios.UsuarioCivil import Civil
-from life_alert.domain.usuarios.UsuarioAtendente import Atendente
-from life_alert.domain.usuarios.UsuarioAgente import Agente
+from infrastructure.database.connection import getDbConnection
+from domain.usuarios.UsuarioCivil import Civil
+from domain.usuarios.UsuarioAtendente import Atendente
+from domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioRepository:
     def salvar(self, usuario):
@@ -41,10 +41,10 @@ class UsuarioRepository:
             
             return usuario
 
-    def buscarPorCredenciais(self, email, _senha):
+    def buscarPorCredenciais(self, email, senha):
         with getDbConnection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, _senha))
+            cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, senha))
             linha = cursor.fetchone()
             return self._instanciar_usuario(linha)
     
@@ -64,18 +64,36 @@ class UsuarioRepository:
             return self._instanciar_usuario(linha)
     
     def buscarPorId(self, id):
-        """Retorna um usuário dado seu id (ou None se não existir)."""
         with getDbConnection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM usuarios WHERE id = ?", (id,))
             linha = cursor.fetchone()
-            return self._instanciar_usuario(linha) if linha else None
-
+            return self._instanciar_usuario(linha)
+    
     def excluir(self, cpf):
         with getDbConnection() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM usuarios WHERE cpf = ?", (cpf,))
             return cursor.rowcount > 0
+    
+    def criar_usuario_temporario(self, id_agente):
+        from domain.usuarios.UsuarioAgente import Agente
+        u = Agente(
+            nome=f"Agente {id_agente}", 
+            cpf="000.000.000-00", 
+            senha="senha123", 
+            cidade="Não informada",
+            telefone="000000000",
+            rua="Rua",
+            num="0",
+            bairro="Bairro",
+            estado="ST",
+            email=f"agente{id_agente}@lifealert.com", 
+            cargo="Agente",
+            status="Ativo"
+        )
+        u.id = id_agente
+        return u
     
     def _instanciar_usuario(self, linha):
         if not linha:

@@ -1,6 +1,9 @@
 from life_alert.domain.Alerta import Alerta
 
 class AlertaFactory:
+    """
+    Classe responsável pela criação de objetos da classe que ela importa.
+    """
     @staticmethod
     def criar_alerta(titulo, mensagem, ocorrencia, escopo, horario):
         if not ocorrencia:
