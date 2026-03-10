@@ -1,5 +1,5 @@
-from infrastructure.database.connection import getDbConnection
-from domain.Resgate import Resgate
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.Resgate import Resgate
 
 
 class ResgateRepository:
@@ -10,7 +10,6 @@ class ResgateRepository:
         with getDbConnection() as conn:
             cursor = conn.cursor()
             
-            # Criar tabela de resgates se não existir
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS resgates (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +22,12 @@ class ResgateRepository:
                 )
             """)
             
+            exists = False
             if hasattr(resgate, 'id') and resgate.id:
+                cursor.execute("SELECT 1 FROM resgates WHERE id = ?", (resgate.id,))
+                exists = cursor.fetchone() is not None
+
+            if exists:
                 cursor.execute("""
                     UPDATE resgates
                     SET ocorrencia_id=?, data_inicio=?, descricao=?, data_fim=?, qtd_resgatados=?

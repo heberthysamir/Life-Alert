@@ -1,4 +1,5 @@
 from .connection import getDbConnection
+import sqlite3
 
 def create_tables():
     with getDbConnection() as conn:
@@ -73,6 +74,9 @@ def create_tables():
                 gravidade TEXT,
                 tipo TEXT,
                 qtd_afetados INTEGER,
+                perfil_medico TEXT,
+                sintomas TEXT,
+                prontuarios_vitimas TEXT,
                 FOREIGN KEY(atendente_id) REFERENCES usuarios(id),
                 FOREIGN KEY(agente_id) REFERENCES usuarios(id),
                 FOREIGN KEY(civil_id) REFERENCES usuarios(id),
@@ -102,3 +106,18 @@ def create_tables():
                 FOREIGN KEY(ocorrencia_id) REFERENCES ocorrencias(id) ON DELETE CASCADE
             )
         """)
+
+        try:
+            cursor.execute("ALTER TABLE ocorrencias ADD COLUMN perfil_medico TEXT")
+        except sqlite3.OperationalError:
+            pass  
+
+        try:
+            cursor.execute("ALTER TABLE ocorrencias ADD COLUMN sintomas TEXT")
+        except sqlite3.OperationalError:
+            pass  
+
+        try:
+            cursor.execute("ALTER TABLE ocorrencias ADD COLUMN prontuarios_vitimas TEXT")
+        except sqlite3.OperationalError:
+            pass  

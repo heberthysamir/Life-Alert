@@ -6,7 +6,7 @@ class Atendente(Usuario):
         self.turno = turno
     
     def obter_funcionalidades(self):
-        acoes = super().obter_funcionalidades() # Pega as ações de atualizar/excluir
+        acoes = super().obter_funcionalidades() 
         acoes.extend([
             ("🎧 Atendimentos Ativos", lambda container: self.gui_ref.tela_gerenciar_atendimentos(container)),
             ("⚠️ Gerenciar Alertas", lambda container: self.gui_ref.tela_painel_alertas(container))

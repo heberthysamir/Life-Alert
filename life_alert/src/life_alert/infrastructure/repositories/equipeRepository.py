@@ -1,15 +1,18 @@
-from infrastructure.database.connection import getDbConnection
+from life_alert.infrastructure.database.connection import getDbConnection
 
 
-class EquipeRepository:
-    """Repository para gerenciar Equipes de Resgate"""
-    
+class EquipeRepository:    
     def salvar(self, equipe):
         """Salva ou atualiza equipe"""
         with getDbConnection() as conn:
             cursor = conn.cursor()
             
+            exists = False
             if hasattr(equipe, 'id') and equipe.id:
+                cursor.execute("SELECT 1 FROM equipes_resgate WHERE id = ?", (equipe.id,))
+                exists = cursor.fetchone() is not None
+
+            if exists:
                 cursor.execute("""
                     UPDATE equipes_resgate
                     SET localidade=?, status=?, setor=?, especialidade=?
@@ -33,7 +36,6 @@ class EquipeRepository:
                 ))
                 equipe.id = cursor.lastrowid
                 
-                # Salvar agentes da equipe
                 if hasattr(equipe, 'agentes') and equipe.agentes:
                     for agente in equipe.agentes:
                         cursor.execute("""

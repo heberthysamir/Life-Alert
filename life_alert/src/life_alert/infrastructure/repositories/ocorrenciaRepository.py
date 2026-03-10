@@ -1,25 +1,35 @@
-from infrastructure.database.connection import getDbConnection
-from domain.ocorrencias.Ocorrencia import Ocorrencia
-from domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
-from domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.ocorrencias.Ocorrencia import Ocorrencia
+from life_alert.domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
+from life_alert.domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
 from datetime import datetime
+import json
 
 
 class OcorrenciaRepository:
     def salvar(self, ocorrencia):
-        """Salva ou atualiza ocorrência no BD"""
         with getDbConnection() as conn:
             cursor = conn.cursor()
+
+            tipo = "Medica" if isinstance(ocorrencia, OcorrenciaMedica) else ("Policial" if isinstance(ocorrencia, OcorrenciaPolicial) else "geral")
             
-            tipo = "Medica" if isinstance(ocorrencia, OcorrenciaMedica) else "Policial"
-            
+            perfil_medico = getattr(ocorrencia, 'perfilMedico', None) if isinstance(ocorrencia, OcorrenciaMedica) else None
+            sintomas = getattr(ocorrencia, 'sintomas', None) if isinstance(ocorrencia, OcorrenciaMedica) else None
+            prontuarios_vitimas = json.dumps(getattr(ocorrencia, 'prontuariosVitimas', {})) if isinstance(ocorrencia, OcorrenciaMedica) else None
+
             if hasattr(ocorrencia, 'id') and ocorrencia.id:
-                # UPDATE
+                cursor.execute("SELECT 1 FROM ocorrencias WHERE id = ?", (ocorrencia.id,))
+                existe = cursor.fetchone()
+            else:
+                existe = None
+
+            if existe:
                 cursor.execute("""
                     UPDATE ocorrencias
                     SET atendente_id=?, agente_id=?, civil_id=?, equipe_id=?,
                         data_hora=?, status=?, descricao=?, rua=?, bairro=?,
-                        cidade=?, estado=?, gravidade=?, tipo=?, qtd_afetados=?
+                        cidade=?, estado=?, gravidade=?, tipo=?, qtd_afetados=?,
+                        perfil_medico=?, sintomas=?, prontuarios_vitimas=?
                     WHERE id=?
                 """, (
                     getattr(ocorrencia.atendente, 'id', None) if ocorrencia.atendente else None,
@@ -36,6 +46,9 @@ class OcorrenciaRepository:
                     ocorrencia.gravidade,
                     tipo,
                     ocorrencia.qtdAfetados,
+                    perfil_medico,
+                    sintomas,
+                    prontuarios_vitimas,
                     ocorrencia.id
                 ))
             else:
@@ -44,8 +57,8 @@ class OcorrenciaRepository:
                     INSERT INTO ocorrencias 
                     (atendente_id, agente_id, civil_id, equipe_id, data_hora,
                      status, descricao, rua, bairro, cidade, estado, gravidade, 
-                     tipo, qtd_afetados)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     tipo, qtd_afetados, perfil_medico, sintomas, prontuarios_vitimas)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     getattr(ocorrencia.atendente, 'id', None) if ocorrencia.atendente else None,
                     getattr(ocorrencia.agente, 'id', None) if ocorrencia.agente else None,
@@ -60,10 +73,13 @@ class OcorrenciaRepository:
                     ocorrencia.estado,
                     ocorrencia.gravidade,
                     tipo,
-                    ocorrencia.qtdAfetados
+                    ocorrencia.qtdAfetados,
+                    perfil_medico,
+                    sintomas,
+                    prontuarios_vitimas
                 ))
                 ocorrencia.id = cursor.lastrowid
-            
+
             return ocorrencia
 
     def listarTodos(self):
@@ -114,13 +130,33 @@ class OcorrenciaRepository:
             'cidade': linha['cidade'],
             'estado': linha['estado'],
             'gravidade': linha['gravidade'],
+            'tipo': linha['tipo'],
             'qtdAfetados': linha['qtd_afetados']
         }
         
         if tipo == 'Medica':
+            kwargs.update({
+                'perfilMedico': linha['perfil_medico'],
+                'sintomas': linha['sintomas'],
+                'prontuariosVitimas': json.loads(linha['prontuarios_vitimas']) if linha['prontuarios_vitimas'] else {}
+            })
             oc = OcorrenciaMedica(**kwargs)
+        elif tipo == 'Policial':
+            oc = OcorrenciaPolicial(tipoCrime='desconhecido', qtdCriminosos=0, descricaoSuspeito='desconhecido', **kwargs)
         else:
-            oc = OcorrenciaPolicial(**kwargs)
+            oc = Ocorrencia(**kwargs)
         
         oc.id = linha['id']
+
+        from .repositoryContainer import get_repositories
+        repos = get_repositories()
+        if linha['civil_id']:
+            oc.civil = repos.usuario.buscarPorId(linha['civil_id'])
+        if linha['atendente_id']:
+            oc.atendente = repos.usuario.buscarPorId(linha['atendente_id'])
+        if linha['agente_id']:
+            oc.agente = repos.usuario.buscarPorId(linha['agente_id'])
+        if linha['equipe_id']:
+            oc.equipe = repos.equipe.buscarPorId(linha['equipe_id'])
+        
         return oc

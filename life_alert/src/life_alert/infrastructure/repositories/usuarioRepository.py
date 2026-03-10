@@ -1,7 +1,7 @@
-from infrastructure.database.connection import getDbConnection
-from domain.usuarios.UsuarioCivil import Civil
-from domain.usuarios.UsuarioAtendente import Atendente
-from domain.usuarios.UsuarioAgente import Agente
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.usuarios.UsuarioCivil import Civil
+from life_alert.domain.usuarios.UsuarioAtendente import Atendente
+from life_alert.domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioRepository:
     def salvar(self, usuario):
@@ -63,6 +63,14 @@ class UsuarioRepository:
             linha = cursor.fetchone()
             return self._instanciar_usuario(linha)
     
+    def buscarPorId(self, id):
+        """Retorna um usuário dado seu id (ou None se não existir)."""
+        with getDbConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM usuarios WHERE id = ?", (id,))
+            linha = cursor.fetchone()
+            return self._instanciar_usuario(linha) if linha else None
+
     def excluir(self, cpf):
         with getDbConnection() as conn:
             cursor = conn.cursor()

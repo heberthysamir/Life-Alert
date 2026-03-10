@@ -1,5 +1,5 @@
-from infrastructure.database.connection import getDbConnection
-from domain.Alerta import Alerta
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.Alerta import Alerta
 
 
 class AlertaRepository:
@@ -11,7 +11,6 @@ class AlertaRepository:
             cursor = conn.cursor()
             
             if hasattr(alerta, 'id') and alerta.id:
-                # UPDATE
                 cursor.execute("""
                     UPDATE alertas
                     SET titulo=?, mensagem=?, ocorrencia_id=?, escopo=?, horario=?
@@ -25,7 +24,6 @@ class AlertaRepository:
                     alerta.id
                 ))
             else:
-                # INSERT
                 cursor.execute("""
                     INSERT INTO alertas (titulo, mensagem, ocorrencia_id, escopo, horario)
                     VALUES (?, ?, ?, ?, ?)

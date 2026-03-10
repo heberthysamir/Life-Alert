@@ -1,11 +1,11 @@
 import pytest
-from domain.PerfilMedico import PerfilMedico
-from domain.Atendimento import Atendimento
-from domain.Alerta import Alerta
-from domain.Resgate import Resgate
-from domain.EquipeResgate import EquipeResgate
-from domain.Vitima import Vitima
-from application.atendimentoService import AtendimentoService
+from life_alert.domain.PerfilMedico import PerfilMedico
+from life_alert.domain.Atendimento import Atendimento
+from life_alert.domain.Alerta import Alerta
+from life_alert.domain.Resgate import Resgate
+from life_alert.domain.EquipeResgate import EquipeResgate
+from life_alert.domain.Vitima import Vitima
+from life_alert.application.atendimentoService import AtendimentoService
 
 class MockUsuario:
     def __init__(self, id, nome, tipo, cidade):
@@ -171,3 +171,43 @@ def test_alerta_str_format(ocorrencia_padrao):
     assert "Forte Chuva (15:00)" in texto
     assert "Local: Malvinas - Barbalha" in texto
     assert "Aviso: Evite sair de casa" in texto
+
+
+def test_civil_registra_e_recupera_ocorrencia():
+    """Garanta que uma ocorrência criada por um civil é persistida no banco
+    e pode ser consultada posteriormente."""
+    from life_alert.infrastructure.database.setup import create_tables
+    from life_alert.infrastructure.repositories.usuarioRepository import UsuarioRepository
+    from life_alert.infrastructure.repositories.ocorrenciaRepository import OcorrenciaRepository
+    from life_alert.application.ocorrenciaFactory import OcorrenciaFactory
+    from domain.usuarios.UsuarioCivil import Civil
+    from datetime import datetime
+
+    # garantir estrutura de banco existente
+    create_tables()
+
+    usuario_repo = UsuarioRepository()
+    ocorr_repo = OcorrenciaRepository()
+
+    # prepara usuário de teste (exclui se já existir e cria um novo)
+    cpf_teste = "11122233344"
+    antigo = usuario_repo.buscarCpf(cpf_teste)
+    if antigo:
+        usuario_repo.excluir(cpf_teste)
+    civil = Civil(nome="Teste Civil", cpf=cpf_teste, telefone="0000", rua="R", num="1",
+                  bairro="B", cidade="C", estado="E", email="civil@teste.com", senha="senha123")
+    usuario_repo.salvar(civil)
+
+    # cria ocorrência associada ao civil e salva
+    oc = OcorrenciaFactory.criar("2",
+                                 atendente=None, agente=None, civil=civil,
+                                 dataHora=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                 status="Aberta", descricao="Ocorrência de teste",
+                                 rua="Alguma", bairro="Algum", cidade="Cidade",
+                                 estado="EST", gravidade="Baixa", tipo="Médica", qtdAfetados=0)
+    ocorr_repo.salvar(oc)
+
+    todas = ocorr_repo.listarTodos()
+    minhas = [o for o in todas if o.civil and getattr(o.civil, "id", None) == civil.id]
+    assert len(minhas) >= 1
+    assert any(o.id == oc.id for o in minhas)
