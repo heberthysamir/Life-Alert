@@ -24,7 +24,7 @@ class UsuarioRepository:
             """, (
                     usuario.nome, usuario.telefone, usuario.rua, usuario.num, 
                     usuario.bairro, usuario.cidade, usuario.estado, usuario.email, 
-                    usuario.senha, turno, cargo, status, usuario.cpf
+                    usuario._senha, turno, cargo, status, usuario.cpf
                 ))
             else:
                 cursor.execute("""
@@ -34,17 +34,17 @@ class UsuarioRepository:
                 """, (
                     usuario.nome, usuario.cpf, usuario.telefone, usuario.rua, usuario.num, 
                     usuario.bairro, usuario.cidade, usuario.estado, usuario.email, 
-                    usuario.senha, usuario.tipo, turno, cargo, status
+                    usuario._senha, usuario.tipo, turno, cargo, status
                 ))
 
                 usuario.id = cursor.lastrowid
             
             return usuario
 
-    def buscarPorCredenciais(self, email, senha):
+    def buscarPorCredenciais(self, email, _senha):
         with getDbConnection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, senha))
+            cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, _senha))
             linha = cursor.fetchone()
             return self._instanciar_usuario(linha)
     
