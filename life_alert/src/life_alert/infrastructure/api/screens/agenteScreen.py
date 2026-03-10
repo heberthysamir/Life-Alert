@@ -10,8 +10,8 @@ if __name__ == "__main__":
     if life_alert_root not in sys.path:
         sys.path.insert(0, life_alert_root)
 
-from application.equipeFactory import EquipeFactory
-from application.vitimaFactory import VitimaFactory
+from life_alert.application.equipeFactory import EquipeFactory
+from life_alert.application.vitimaFactory import VitimaFactory
 
 # Constantes de Estilo para consistência visual
 PRIMARY = "#c53030"    
@@ -328,7 +328,7 @@ class AgenteScreen:
         Gera visualização de estatísticas operacionais baseada em um intervalo de datas.
         Inclui tempo médio de atendimento e distribuição por tipo de ocorrência.
         """
-        from application.relatorioService import RelatorioService
+        from life_alert.application.relatorioService import RelatorioService
         
         for w in container.winfo_children(): w.destroy()
         

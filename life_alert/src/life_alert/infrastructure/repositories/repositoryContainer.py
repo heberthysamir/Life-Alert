@@ -12,9 +12,7 @@ from .vitimaRepository import VitimaRepository
 from .resgateRepository import ResgateRepository
 
 
-class RepositoryContainer:
-    """Container que centraliza todos os repositórios"""
-    
+class RepositoryContainer:    
     _instance = None
     
     def __new__(cls):

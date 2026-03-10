@@ -1,4 +1,4 @@
-from domain.EquipeResgate import EquipeResgate
+from life_alert.domain.EquipeResgate import EquipeResgate
 
 class EquipeFactory:
     @staticmethod

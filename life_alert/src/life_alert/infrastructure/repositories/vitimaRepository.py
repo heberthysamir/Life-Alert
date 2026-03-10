@@ -1,10 +1,8 @@
-from infrastructure.database.connection import getDbConnection
-from domain.Vitima import Vitima
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.Vitima import Vitima
 
 
 class VitimaRepository:
-    """Repository para gerenciar Vítimas (Entidade Fraca dependente de Ocorrencia)"""
-
     def salvar(self, vitima):
         """Salva vítima - sempre vinculada a uma ocorrência existente"""
         if not vitima.ocorrencia:
@@ -18,7 +16,6 @@ class VitimaRepository:
             cursor = conn.cursor()
 
             if hasattr(vitima, 'id') and vitima.id:
-                # UPDATE - vítima já existe
                 cursor.execute("""
                     UPDATE vitimas
                     SET nome=?, idade=?, situacao=?
@@ -31,7 +28,6 @@ class VitimaRepository:
                     ocorrencia_id
                 ))
             else:
-                # INSERT - nova vítima (sempre vinculada à ocorrência)
                 cursor.execute("""
                     INSERT INTO vitimas (nome, idade, situacao, ocorrencia_id)
                     VALUES (?, ?, ?, ?)
@@ -104,7 +100,7 @@ class VitimaRepository:
             return cursor.rowcount > 0
 
     def excluirPorOcorrencia(self, ocorrencia_id):
-        """Remove todas as vítimas de uma ocorrência (cascade manual)"""
+        """Remove todas as vítimas de uma ocorrência"""
         with getDbConnection() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM vitimas WHERE ocorrencia_id = ?", (ocorrencia_id,))
@@ -123,7 +119,6 @@ class VitimaRepository:
         if not linha:
             return None
 
-        # Criar objeto ocorrência mínimo para a vítima
         class OcorrenciaStub:
             def __init__(self, id, descricao):
                 self.id = id

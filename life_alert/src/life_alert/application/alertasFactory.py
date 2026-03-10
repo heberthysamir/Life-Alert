@@ -1,4 +1,4 @@
-from domain.Alerta import Alerta
+from life_alert.domain.Alerta import Alerta
 
 class AlertaFactory:
     @staticmethod
