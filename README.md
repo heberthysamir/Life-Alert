@@ -10,6 +10,9 @@
   
   Este projeto é desenvolvido e efetuado por estudantes da graduação de Engenharia de Software, na Universidade Federal do Cariri (UFCA), como componente da disciplina de **Programação Orientada a Objetos**, ministrada pelo professor **Jayr Alencar Pereira**.
 
+## Documentação completa:
+> [https://docs.google.com/document/d/1UeGcQkk62bEYJT1ucjH1O0DPqV4r0UdikPmub1u32a0/edit?usp=sharing](https://docs.google.com/document/d/1BBxK38QYwPDzoBBlVUMnG4FWqkcJv4U78isvuS5pu1A/edit?usp=sharing)
+
 ## Estrutura do código:
 
 ```
@@ -28,6 +31,7 @@ life-alert
 |   |   |   ├── perfilMedicoFactory.py
 |   |   |   ├── relatorioService.py
 |   |   |   ├── usuariosFactory.py
+|   |   |   ├── usuariosService.py
 |   |   |   └── vitimaFactory.py
 |   |   |
 |   |   ├── domain/
@@ -56,12 +60,24 @@ life-alert
 |   |   ├── infrastructure/
 |   |   |   ├── api/
 |   |   |   |   ├── screens/
-|   |   |   |   |   ├── agenteScreen.py
-|   |   |   |   |   ├── atendenteScreen.py
-|   |   |   |   |   ├── authScreen.py
-|   |   |   |   |   └── civilScreen.py
+|   |   |   |   |   ├── agenteScreen.py     
+|   |   |   |   |   ├── atendenteScreen.py  
+|   |   |   |   |   ├── authScreen.py       
+|   |   |   |   |   └── civilScreen.py      
 |   |   |   |   ├── __init__.py
-|   |   |   |   └── interface.py
+|   |   |   |   └── interface.py            
+|   |   |   ├── database/
+|   |   |   |   ├── connection.py        
+|   |   |   |   └── setup.py            
+|   |   |   ├── repositories/
+|   |   |   |   ├── alertaRepository.py
+|   |   |   |   ├── atendimentoRepository.py
+|   |   |   |   ├── equipeRepository.py
+|   |   |   |   ├── ocorrenciaRepository.py
+|   |   |   |   ├── resgateRepository.py
+|   |   |   |   ├── usuarioRepository.py
+|   |   |   |   ├── vitimaRepository.py
+|   |   |   |   └── repositoryContainer.py
 |   |   |
 |   |   └── main.py
 |   ├── tests/
@@ -73,4 +89,27 @@ life-alert
 └── README.md
 
 ```
+## Pré-requisitos:
 
+- Python instalado
+
+## Como executar:
+
+1. Clone o repositório
+2. Instale as dependencias:
+```bash
+poetry install
+```
+3. Execute o programa:
+```bash
+poetry run python life_alert/src/life_alert/main.py
+```
+ou
+- Windowns:
+```bash
+python life_alert/src/life_alert/main.py
+```
+- Linux ou macOS:
+```bash
+python3 life_alert/src/life_alert/main.py
+```
