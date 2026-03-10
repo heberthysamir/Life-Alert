@@ -1,12 +1,17 @@
 from .Ocorrencia import Ocorrencia
 
 class OcorrenciaPolicial(Ocorrencia):
+    """
+    Especialização de Ocorrencia para incidentes de segurança pública.
+    Adiciona campos específicos para investigação preliminar, como o tipo de crime,
+    a contagem de envolvidos e a descrição de suspeitos para auxílio às autoridades.
+    """
     def __init__(self, tipoCrime, qtdCriminosos, descricaoSuspeito, **kwargs):
         super().__init__(**kwargs)
         self._tipoCrime = None
         self._qtdCriminosos = None
         self._descricaoSuspeito = None
-        
+        # Uso dos setters para validação inicial
         self.tipoCrime = tipoCrime
         self.qtdCriminosos = qtdCriminosos
         self.descricaoSuspeito = descricaoSuspeito
@@ -47,19 +52,10 @@ class OcorrenciaPolicial(Ocorrencia):
             raise ValueError("Descrição de suspeito não pode ser vazia.")
         self._descricaoSuspeito = valor.strip()
 
-    def registrarBoletim(self):
-        print(f"Boletim registrado para ocorrência policial: {self.tipoCrime}")
-        print(f"  - Quantidade de criminosos: {self.qtdCriminosos}")
-        print(f"  - Descrição: {self.descricaoSuspeito}")
-        return True
-
-    def atualizar_quantidade_criminosos(self, nova_quantidade):
-        try:
-            self.qtdCriminosos = nova_quantidade
-            return True
-        except ValueError as e:
-            print(f"Erro ao atualizar quantidade: {e}")
-            return False
-
     def __str__(self):
+        """Representação para exibição em logs."""
         return f"Ocorrência Policial #{self.id} | Crime: {self.tipoCrime} | Criminosos: {self.qtdCriminosos}"
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"OcorrenciaPolicial(id={self.id}, crime='{self.tipoCrime}', qtd={self.qtdCriminosos})"

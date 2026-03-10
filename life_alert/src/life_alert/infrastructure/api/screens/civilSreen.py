@@ -11,12 +11,22 @@ MUTED = "#6b7280"
 
 class CivilScreen:
     @staticmethod
-    def render_lista_alertas(gui, container):
+    def render_lista_alertas( gui, container, alertas_db):
         """
-        Filtra e renderiza os alertas relevantes baseados na localização do usuário.
-        Exibe cards visuais com o tipo de ocorrência, mensagem e escopo do alerta.
+        Renderiza os alertas filtrados para o usuário.
+        alertas_db: lista de objetos Alerta vindos do repositório.
         """
-        alertas = AlertaService.filtrar_alertas_para_usuario(gui.usuario_logado, gui.db["alertas"])
+        # Se não recebeu a lista por argumento, tenta buscar no repositório (segurança)
+        if alertas_db is None:
+            alertas_db = gui.alerta_repo.listarTodos()
+            
+        # IMPORTANTE: Use a lista que veio do banco, não gui.db["alertas"]
+        from application.alertasService import AlertaService
+        alertas = AlertaService.filtrar_alertas_para_usuario(gui.usuario_logado, alertas_db)
+        
+        # Limpa o container antes de desenhar
+        for widget in container.winfo_children():
+            widget.destroy()
         
         if not alertas:
             tk.Label(container, text="Nenhum alerta relevante para sua região no momento.", 
@@ -27,12 +37,21 @@ class CivilScreen:
             card = tk.Frame(container, bg=CARD, padx=15, pady=10, highlightthickness=1, highlightbackground="#fee2e2")
             card.pack(fill=tk.X, padx=20, pady=5)
             
-            tk.Label(card, text=f"🚨 {alerta.ocorrencia.tipo.upper()}", bg=CARD, 
+            # Garantir que temos os dados da ocorrência (mesmo que seja um ID)
+            tipo = "ALERTA"
+            bairro = "Geral"
+            
+            # Se o repositório retornar o objeto Ocorrência, pegamos os dados reais
+            if hasattr(alerta.ocorrencia, 'tipo'):
+                tipo = alerta.ocorrencia.tipo
+                bairro = alerta.ocorrencia.bairro
+            
+            tk.Label(card, text=f"🚨 {tipo.upper()}", bg=CARD, 
                      fg=PRIMARY, font=("Segoe UI", 10, "bold")).pack(anchor="w")
             
             tk.Label(card, text=alerta.mensagem, bg=CARD, wraplength=450, justify="left", font=("Segoe UI", 9)).pack(anchor="w")
             
-            tk.Label(card, text=f"Local: {alerta.ocorrencia.bairro} ({alerta.escopo.capitalize()})", 
+            tk.Label(card, text=f"Local: {bairro} ({alerta.escopo.capitalize()})", 
                      bg=CARD, fg="#9ca3af", font=("Segoe UI", 8)).pack(anchor="w")
 
     @staticmethod
@@ -175,9 +194,20 @@ class CivilScreen:
         Lista todas as ocorrências vinculadas ao cidadão logado.
         Utiliza um Treeview para exibição tabular com suporte a rolagem.
         """
+<<<<<<< HEAD
+        tk.Label(container, text="MINHAS OCORRÊNCIAS", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
+        
+        todas_ocs = gui.ocorrencia_repo.listarTodos()
+        print("\n--- DEBUG DE LEITURA ---")
+        for oc in todas_ocs:
+            print(f"Ocorrência {oc.id} lida do banco -> Civil: {oc.civil} | Atendente: {oc.atendente}")
+        print("------------------------\n")
+        minhas_ocs = [oc for oc in todas_ocs if oc.civil and oc.civil.cpf == gui.usuario_logado.cpf]
+=======
 
         minhas_ocs = [oc for oc in gui.db.get("ocorrencias", [])
                      if oc.civil and getattr(oc.civil, "id", None) == gui.usuario_logado.id]
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
 
         if not minhas_ocs:
             tk.Label(container, text="Você ainda não registrou nenhuma ocorrência.", 

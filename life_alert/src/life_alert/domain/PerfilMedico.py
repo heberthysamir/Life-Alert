@@ -1,11 +1,16 @@
 class PerfilMedico:
+    """
+    Armazena informações clínicas críticas de um usuário ou vítima.
+    Esses dados são fundamentais para que a equipe de resgate tome decisões 
+    seguras durante o atendimento.
+    """
     def __init__(self, alergias, doencas, deficiencia, tipoSanguineo, contatoEmerg):
         self._alergias = None
         self._doencas = None
         self._deficiencia = None
         self._tipoSanguineo = None
         self._contatoEmerg = None
-        
+        # Uso dos setters para validação inicial
         self.alergias = alergias
         self.doencas = doencas
         self.deficiencia = deficiencia
@@ -66,27 +71,15 @@ class PerfilMedico:
             raise ValueError("Contato de emergência não pode ser vazio.")
         self._contatoEmerg = valor.strip()
 
-    def atualizar_dados(self, nova_alergia=None, nova_doenca=None, nova_deficiencia=None, novo_tipo=None, novo_contato=None):
-        try:
-            if nova_alergia is not None: 
-                self.alergias = nova_alergia
-            if nova_doenca is not None: 
-                self.doencas = nova_doenca
-            if nova_deficiencia is not None: 
-                self.deficiencia = nova_deficiencia
-            if novo_tipo is not None: 
-                self.tipoSanguineo = novo_tipo
-            if novo_contato is not None:
-                self.contatoEmerg = novo_contato
-            return True
-        except ValueError as e:
-            print(f"Erro ao atualizar perfil médico: {e}")
-            return False
-
     def __str__(self):
-        return (f"INFORMAÇÕES MÉDICAS:\n"
+        """Representação para exibição em logs."""
+        return (f"--- INFORMAÇÕES MÉDICAS ---\n"
                 f"Alergias: {self.alergias}\n"
                 f"Doenças Crônicas: {self.doencas}\n"
                 f"Deficiência: {self.deficiencia}\n"
                 f"Tipo Sanguíneo: {self.tipoSanguineo}\n"
-                f"Contato de Emergência: {self.contatoEmerg}")
+                f"Contato de Emergência: {self.contatoEmerg}\n")
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"PerfilMedico(tipo='{self.tipoSanguineo}', contato='{self.contatoEmerg}')"

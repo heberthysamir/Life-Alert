@@ -1,5 +1,9 @@
 class Vitima:
-    """Entidade Fraca - Vitima depende de Ocorrencia para existir"""
+    """
+    Armazena os dados básicos das pessoas afetadas por um incidente,
+    permitindo que as equipes de resgate priorizem o atendimento com
+    base na situação informada.
+    """
 
     def __init__(self, nome, idade, situacao, ocorrencia):
         if not ocorrencia:
@@ -62,13 +66,11 @@ class Vitima:
             raise ValueError("Ocorrência não pode ser nula.")
         self._ocorrencia = valor
 
-    def atualizar_situacao(self, nova_situacao):
-        try:
-            self.situacao = nova_situacao
-            return True
-        except ValueError:
-            return False
-
     def __str__(self):
-        oc_id = getattr(self.ocorrencia, 'id', 'N/A')
-        return f"Vítima: {self.nome} | Idade: {self.idade} | Situação: {self.situacao} | Ocorrência #{oc_id}"
+        """Representação para exibição em logs."""
+        oc_id = getattr(self.ocorrencia, 'id', 'Não salva')
+        return f"Vítima: {self.nome} ({self.idade} anos) - Status: {self.situacao} | Ref: Ocor. #{oc_id}"
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"Vitima(id={self.id}, nome='{self.nome}', situacao='{self.situacao}')"

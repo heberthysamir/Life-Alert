@@ -1,4 +1,8 @@
 class AtendimentoService:
+    """
+    Classe responsável pela lógica busca e designa 
+    o atendente responsável por uma ocorrência criada
+    """
     @staticmethod
     def designarAtendente(ocorrencia, lista_usuarios, lista_atendimentos):
         atendentesLocais = [

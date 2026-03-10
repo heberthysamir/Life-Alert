@@ -1,4 +1,8 @@
 class AlertaService:
+    """
+    Classe responsável pela lógica que envia alertas 
+    para os usuários relacionados dependendo do escopo.
+    """
     @staticmethod
     def filtrar_alertas_para_usuario(usuario, lista_alertas):
         alertas_filtrados = []

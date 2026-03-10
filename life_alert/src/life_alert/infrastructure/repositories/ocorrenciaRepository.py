@@ -13,17 +13,15 @@ class OcorrenciaRepository:
 
             tipo = "Medica" if isinstance(ocorrencia, OcorrenciaMedica) else ("Policial" if isinstance(ocorrencia, OcorrenciaPolicial) else "geral")
             
-            perfil_medico = getattr(ocorrencia, 'perfilMedico', None) if isinstance(ocorrencia, OcorrenciaMedica) else None
-            sintomas = getattr(ocorrencia, 'sintomas', None) if isinstance(ocorrencia, OcorrenciaMedica) else None
-            prontuarios_vitimas = json.dumps(getattr(ocorrencia, 'prontuariosVitimas', {})) if isinstance(ocorrencia, OcorrenciaMedica) else None
-
-            if hasattr(ocorrencia, 'id') and ocorrencia.id:
-                cursor.execute("SELECT 1 FROM ocorrencias WHERE id = ?", (ocorrencia.id,))
-                existe = cursor.fetchone()
+            if isinstance(ocorrencia, OcorrenciaMedica):
+                tipo_persistido = "Medica"
+            elif isinstance(ocorrencia, OcorrenciaPolicial):
+                tipo_persistido = "Policial"
             else:
-                existe = None
-
-            if existe:
+                tipo_persistido = "Generica"
+            
+            if hasattr(ocorrencia, 'id') and ocorrencia.id: 
+                # UPDATE
                 cursor.execute("""
                     UPDATE ocorrencias
                     SET atendente_id=?, agente_id=?, civil_id=?, equipe_id=?,
@@ -44,11 +42,8 @@ class OcorrenciaRepository:
                     ocorrencia.cidade,
                     ocorrencia.estado,
                     ocorrencia.gravidade,
-                    tipo,
+                    tipo_persistido,
                     ocorrencia.qtdAfetados,
-                    perfil_medico,
-                    sintomas,
-                    prontuarios_vitimas,
                     ocorrencia.id
                 ))
             else:
@@ -72,11 +67,8 @@ class OcorrenciaRepository:
                     ocorrencia.cidade,
                     ocorrencia.estado,
                     ocorrencia.gravidade,
-                    tipo,
-                    ocorrencia.qtdAfetados,
-                    perfil_medico,
-                    sintomas,
-                    prontuarios_vitimas
+                    tipo_persistido,
+                    ocorrencia.qtdAfetados
                 ))
                 ocorrencia.id = cursor.lastrowid
 
@@ -89,6 +81,22 @@ class OcorrenciaRepository:
             cursor.execute("SELECT * FROM ocorrencias")
             linhas = cursor.fetchall()
             return [self._instanciar_ocorrencia(linha) for linha in linhas] if linhas else []
+    
+    def buscarPorCivil(self, civil_id):
+        """Traz apenas as ocorrências do civil logado"""
+        with getDbConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM ocorrencias WHERE civil_id = ?", (civil_id,))
+            linhas = cursor.fetchall()
+            return [self._instanciar_ocorrencia(linha) for linha in linhas]
+
+    def buscarPorAtendente(self, atendente_id):
+        """Traz as ocorrências designadas para o atendente logado"""
+        with getDbConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM ocorrencias WHERE atendente_id = ?", (atendente_id,))
+            linhas = cursor.fetchall()
+            return [self._instanciar_ocorrencia(linha) for linha in linhas]
 
     def buscarPorId(self, id):
         """Busca ocorrência específica"""
@@ -116,12 +124,24 @@ class OcorrenciaRepository:
     def _instanciar_ocorrencia(self, linha):
         if not linha:
             return None
+
+        from .usuarioRepository import UsuarioRepository
+        from .equipeRepository import EquipeRepository
+        user_repo = UsuarioRepository()
+        eq_repo = EquipeRepository()
         
-        tipo = linha['tipo']
+        civil_obj = user_repo.buscarPorId(linha['civil_id']) if linha['civil_id'] else None
+        atendente_obj = user_repo.buscarPorId(linha['atendente_id']) if linha['atendente_id'] else None
+        agente_obj = user_repo.buscarPorId(linha['agente_id']) if linha['agente_id'] else None
+        equipe_obj = eq_repo.buscarPorId(linha['equipe_id']) if linha['equipe_id'] else None
+
+
+        tipo_banco = linha['tipo']
+        
         kwargs = {
-            'atendente': None,
-            'agente': None,
-            'civil': None,
+            'atendente': atendente_obj, 
+            'agente': agente_obj,       
+            'civil': civil_obj,         
             'dataHora': linha['data_hora'],
             'status': linha['status'],
             'descricao': linha['descricao'],
@@ -130,33 +150,25 @@ class OcorrenciaRepository:
             'cidade': linha['cidade'],
             'estado': linha['estado'],
             'gravidade': linha['gravidade'],
-            'tipo': linha['tipo'],
-            'qtdAfetados': linha['qtd_afetados']
+            'qtdAfetados': linha['qtd_afetados'],
+            'tipo': tipo_banco # Mantém o nome original (Ex: "Incêndio")
         }
         
-        if tipo == 'Medica':
-            kwargs.update({
-                'perfilMedico': linha['perfil_medico'],
-                'sintomas': linha['sintomas'],
-                'prontuariosVitimas': json.loads(linha['prontuarios_vitimas']) if linha['prontuarios_vitimas'] else {}
-            })
+        # DECISÃO DE INSTÂNCIA
+        if tipo_banco == 'Medica':
             oc = OcorrenciaMedica(**kwargs)
-        elif tipo == 'Policial':
-            oc = OcorrenciaPolicial(tipoCrime='desconhecido', qtdCriminosos=0, descricaoSuspeito='desconhecido', **kwargs)
+        elif tipo_banco == 'Policial':
+            # Preenche campos obrigatórios da subclasse policial
+            kwargs['tipoCrime'] = getattr(linha, 'tipo_crime', "Não informado")
+            kwargs['qtdCriminosos'] = getattr(linha, 'qtd_criminosos', 0)
+            kwargs['descricaoSuspeito'] = getattr(linha, 'desc_suspeito', "Não informada")
+            oc = OcorrenciaPolicial(**kwargs)
         else:
+            # Se for 'Generica' ou qualquer outro tipo (Incêndio, Enchente, etc)
+            # Instancia a superclasse Ocorrencia diretamente
             oc = Ocorrencia(**kwargs)
         
         oc.id = linha['id']
-
-        from .repositoryContainer import get_repositories
-        repos = get_repositories()
-        if linha['civil_id']:
-            oc.civil = repos.usuario.buscarPorId(linha['civil_id'])
-        if linha['atendente_id']:
-            oc.atendente = repos.usuario.buscarPorId(linha['atendente_id'])
-        if linha['agente_id']:
-            oc.agente = repos.usuario.buscarPorId(linha['agente_id'])
-        if linha['equipe_id']:
-            oc.equipe = repos.equipe.buscarPorId(linha['equipe_id'])
-        
+        oc.equipe = equipe_obj
         return oc
+        

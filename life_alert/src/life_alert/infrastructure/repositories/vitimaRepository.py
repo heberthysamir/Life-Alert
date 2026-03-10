@@ -1,21 +1,34 @@
 from life_alert.infrastructure.database.connection import getDbConnection
 from life_alert.domain.Vitima import Vitima
 
-
 class VitimaRepository:
-    def salvar(self, vitima):
-        """Salva vítima - sempre vinculada a uma ocorrência existente"""
-        if not vitima.ocorrencia:
-            raise ValueError("Vítima deve estar vinculada a uma ocorrência.")
+<<<<<<< HEAD
+    """Repository para gerenciar Vítimas vinculadas a uma Ocorrência (via Atendimento)"""
 
-        ocorrencia_id = getattr(vitima.ocorrencia, 'id', vitima.ocorrencia)
+=======
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
+    def salvar(self, vitima):
+        """Salva vítima - extrai o ID da ocorrência do objeto de resgate se necessário"""
+        if not vitima.ocorrencia:
+            raise ValueError("Vítima deve estar vinculada a uma ocorrência ou resgate.")
+
+        if hasattr(vitima.ocorrencia, 'ocorrencia'):
+            ocorrencia_id = vitima.ocorrencia.ocorrencia.id
+        else:
+            ocorrencia_id = getattr(vitima.ocorrencia, 'id', vitima.ocorrencia)
+
         if not ocorrencia_id:
-            raise ValueError("A ocorrência deve ter ID válido.")
+            raise ValueError("Não foi possível determinar o ID da ocorrência para esta vítima.")
 
         with getDbConnection() as conn:
+            conn.row_factory = lambda cursor, row: {col[0]: row[i] for i, col in enumerate(cursor.description)}
             cursor = conn.cursor()
 
             if hasattr(vitima, 'id') and vitima.id:
+<<<<<<< HEAD
+                # UPDATE
+=======
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
                 cursor.execute("""
                     UPDATE vitimas
                     SET nome=?, idade=?, situacao=?
@@ -28,6 +41,10 @@ class VitimaRepository:
                     ocorrencia_id
                 ))
             else:
+<<<<<<< HEAD
+                # INSERT
+=======
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
                 cursor.execute("""
                     INSERT INTO vitimas (nome, idade, situacao, ocorrencia_id)
                     VALUES (?, ?, ?, ?)
@@ -39,18 +56,23 @@ class VitimaRepository:
                 ))
                 vitima.id = cursor.lastrowid
 
+            conn.commit()
             return vitima
 
     def listarTodos(self):
-        """Retorna todas as vítimas com suas ocorrências"""
+        """Retorna todas as vítimas do banco"""
         with getDbConnection() as conn:
+            conn.row_factory = lambda cursor, row: {col[0]: row[i] for i, col in enumerate(cursor.description)}
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT v.*, o.descricao as ocorrencia_descricao
+                SELECT v.*, o.tipo as ocorrencia_tipo, o.descricao as ocorrencia_desc
                 FROM vitimas v
                 JOIN ocorrencias o ON v.ocorrencia_id = o.id
             """)
             linhas = cursor.fetchall()
+<<<<<<< HEAD
+            return [self._instanciar_vitima(linha) for linha in linhas]
+=======
             return [self._instanciar_vitima(linha) for linha in linhas] if linhas else []
 
     def buscarPorId(self, id):
@@ -113,24 +135,36 @@ class VitimaRepository:
             cursor.execute("SELECT COUNT(*) FROM vitimas WHERE ocorrencia_id = ?", (ocorrencia_id,))
             resultado = cursor.fetchone()
             return resultado[0] if resultado else 0
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
 
     def _instanciar_vitima(self, linha):
-        """Converte linha do banco em objeto Vitima com ocorrência"""
-        if not linha:
-            return None
+        if not linha: return None
 
+<<<<<<< HEAD
+        # Garante que a idade seja sempre um inteiro válido
+        raw_idade = linha.get('idade')
+        try:
+            idade_limpa = int(raw_idade) if raw_idade is not None else 0
+        except (ValueError, TypeError):
+            idade_limpa = 0
+=======
         class OcorrenciaStub:
             def __init__(self, id, descricao):
                 self.id = id
                 self.descricao = descricao
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
 
-        ocorrencia_stub = OcorrenciaStub(linha['ocorrencia_id'], linha.get('ocorrencia_descricao', ''))
+        # Cria o vínculo para a interface encontrar o ID
+        class ResgateStub:
+            def __init__(self, id_oc):
+                self.id = id_oc
+                self.ocorrencia = self 
 
         vitima = Vitima(
             nome=linha['nome'],
-            idade=linha['idade'],
+            idade=idade_limpa,
             situacao=linha['situacao'],
-            ocorrencia=ocorrencia_stub
+            ocorrencia=ResgateStub(linha['ocorrencia_id'])
         )
         vitima.id = linha['id']
         return vitima

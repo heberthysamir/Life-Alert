@@ -1,8 +1,12 @@
 class Ocorrencia:
-    _id_auto = 1
+    """
+    Representa um chamado de emergência no sistema Life Alert.
+    
+    Gerencia o ciclo de vida desde a abertura pelo Civil até a finalização 
+    pela equipe de Resgate, controlando a validade dos estados de atendimento.
+    """
     def __init__(self, atendente, agente, civil, dataHora, status, descricao, rua, bairro, cidade, estado, gravidade, tipo, qtdAfetados,**kwargs):
-        self.id = Ocorrencia._id_auto
-        Ocorrencia._id_auto += 1
+        self.id = kwargs.get('id', None)
         self.atendente = atendente
         self.agente = agente
         self.civil = civil
@@ -27,6 +31,10 @@ class Ocorrencia:
 
     @status.setter
     def status(self, novo_status):
+        """
+        Define o status garantindo que ele pertença ao fluxo operacional permitido.
+        Levanta ValueError caso o status seja inválido.
+        """
         status_permitidos = [
             "Aberta", 
             "Em Atendimento", 
@@ -35,6 +43,7 @@ class Ocorrencia:
             "Finalizada"
         ]
 
+        # Normalização para evitar erros de digitação (case-insensitive)
         mapa_status = {s.lower(): s for s in status_permitidos}
         status_lapidado = str(novo_status).strip().lower()
 
@@ -44,5 +53,13 @@ class Ocorrencia:
         self._status = mapa_status[status_lapidado]
 
     def __str__(self):
-        complemento = getattr(self, 'complemento', 'Sem complemento')
-        return f"[{self.id}] {self.tipo} - Status: {self.status}\nDescrição: {self.descricao} \nHorário: {self.dataHora}\nGravidade: {self.gravidade}\nQuantidade de afetados: {self.qtdAfetados}\nEndereço: {self.rua},{self.bairro} - {complemento}\n"
+        """Representação para exibição em logs."""
+        return (f"[{self.id}] {self.tipo} - Status: {self.status}\n"
+                f"Descrição: {self.descricao}\n"
+                f"Horário: {self.dataHora} | Gravidade: {self.gravidade}\n"
+                f"Quantidade de afetados: {self.qtdAfetados}\n"
+                f"Endereço: {self.rua}, {self.bairro} ({self.cidade}-{self.estado})\n")
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"Ocorrencia(id={self.id}, tipo='{self.tipo}', status='{self.status}')"

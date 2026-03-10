@@ -20,7 +20,10 @@ class AtendenteScreen:
         """
         tk.Label(container, text="MEUS ATENDIMENTOS ATIVOS", font=gui.font_header, bg=BG, fg=SECONDARY).pack(pady=20)
         
-        meus_ats = [at for at in gui.db.get("atendimentos", []) if at.atendente == gui.usuario_logado]
+        todos_ats = gui.atendimento_repo.listarTodos()
+        
+        # Filtra apenas os atendimentos onde o ID do atendente for igual ao ID do usuário logado
+        meus_ats = [at for at in todos_ats if at.atendente and at.atendente.id == gui.usuario_logado.id]
 
         if not meus_ats:
             tk.Label(container, text="Você não possui atendimentos designados no momento.", bg=BG, fg=TEXT).pack(pady=50)
@@ -74,22 +77,28 @@ class AtendenteScreen:
         """Formulário interno para configuração e disparo de alertas em massa."""
         tk.Label(frame, text="Selecione uma Ocorrência Base:", bg=CARD, font=("Segoe UI", 10, "bold")).pack(anchor="w")
         
-        todas_ocs = gui.db.get("ocorrencias", [])
+        # --- CORREÇÃO: Busca via Repositório ---
+        todas_ocs = gui.ocorrencia_repo.listarTodos()
         cidade_atendente = gui.usuario_logado.cidade.strip().lower()
         
-        # Filtra apenas ocorrências da mesma cidade do atendente
+        # Filtra ocorrências ativas da mesma cidade
         ocs_disponiveis = [
-            (i, oc) for i, oc in enumerate(todas_ocs) 
-            if oc.status != "Finalizada" and oc.cidade.strip().lower() == cidade_atendente
+            oc for oc in todas_ocs 
+            if str(oc.status).lower() != "finalizada" and 
+            str(oc.cidade).strip().lower() == cidade_atendente
         ]
 
-        lista_oc_str = [f"{i} - {oc.tipo} ({oc.bairro}) | Status: {oc.status}" for i, oc in ocs_disponiveis]
+        # Criamos uma lista formatada para o Combobox
+        lista_oc_str = [f"ID: {oc.id} - {oc.tipo} ({oc.bairro})" for oc in ocs_disponiveis]
         
         gui.combo_oc_alerta = ttk.Combobox(frame, values=lista_oc_str, width=50, state="readonly")
         gui.combo_oc_alerta.pack(pady=10)
 
         if not lista_oc_str:
             gui.combo_oc_alerta.set("Nenhuma ocorrência ativa para gerar alertas")
+        else:
+            # Armazena a lista de objetos para recuperar o ID depois no disparo
+            gui.lista_objetos_oc_alerta = ocs_disponiveis
 
         tk.Label(frame, text="Título do Alerta:", bg=CARD).pack(anchor="w")
         gui.ent_titulo_alerta = ttk.Entry(frame, width=53)
@@ -109,19 +118,38 @@ class AtendenteScreen:
 
     @staticmethod
     def _render_aba_cancelar_alerta(gui, frame):
-        """Lista alertas ativos e permite sua remoção do sistema."""
-        alertas = gui.db.get("alertas", [])
+        """Lista alertas ativos vindos do banco e permite sua remoção via ID real."""
+        # 1. Busca os alertas atualizados do banco de dados
+        alertas = gui.alerta_repo.listarTodos()
         
+        # Limpa o frame antes de renderizar (evita acumular widgets ao atualizar)
+        for widget in frame.winfo_children():
+            widget.destroy()
+
         if not alertas:
-            tk.Label(frame, text="Não há alertas ativos.", bg=CARD, fg=TEXT).pack(pady=20)
+            tk.Label(frame, text="Não há alertas ativos no sistema.", 
+                     bg=CARD, fg=MUTED, font=("Segoe UI", 10, "italic")).pack(pady=40)
             return
 
-        for i, alerta in enumerate(alertas):
-            f = tk.Frame(frame, bg="#fef2f2", pady=5, padx=10)
-            f.pack(fill=tk.X, pady=2)
-            tk.Label(f, text=f"{alerta.titulo} ({alerta.horario})", bg="#fef2f2").pack(side=tk.LEFT)
-            tk.Button(f, text="Cancelar", bg="#fee2e2", fg=PRIMARY, relief=tk.FLAT, cursor="hand2",
-                      command=lambda idx=i: gui.logica_cancelar_alerta(idx)).pack(side=tk.RIGHT)
+        tk.Label(frame, text="Selecione um alerta para remover do sistema:", 
+                 bg=CARD, fg=TEXT, font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(0, 10))
+
+        for alerta in alertas:
+            # Container do alerta
+            f = tk.Frame(frame, bg="#fef2f2", pady=8, padx=12, 
+                         highlightthickness=1, highlightbackground="#fee2e2")
+            f.pack(fill=tk.X, pady=4)
+            
+            # Texto descritivo (Título + Escopo + Horário)
+            texto_exibicao = f"🚨 {alerta.titulo} | {alerta.escopo.upper()} ({alerta.horario})"
+            tk.Label(f, text=texto_exibicao, bg="#fef2f2", 
+                     fg=TEXT, font=("Segoe UI", 9)).pack(side=tk.LEFT)
+            
+            # Botão de cancelar passando o ID ÚNICO do banco
+            # Usamos o alerta.id para garantir que o banco delete o registro correto
+            tk.Button(f, text="🗑️ Cancelar Alerta", bg="#fee2e2", fg=PRIMARY, 
+                      relief=tk.FLAT, cursor="hand2", font=("Segoe UI", 8, "bold"),
+                      command=lambda aid=alerta.id: gui.logica_cancelar_alerta(aid)).pack(side=tk.RIGHT)
     
     @staticmethod
     def render_analisar_atendimento(gui, atendimento, container):
@@ -168,7 +196,8 @@ class AtendenteScreen:
         gui.ent_urgencia.pack(fill=tk.X, pady=5)
 
         tk.Label(right_col, text="Designar Equipe de Resgate:", bg=CARD).pack(anchor="w", pady=(10,0))
-        equipes_todas = gui.db.get("equipes", [])
+
+        equipes_todas = gui.equipe_repo.listarTodos() 
         cidade_atendente = gui.usuario_logado.cidade.strip().lower()
         
         equipes_filtradas = [

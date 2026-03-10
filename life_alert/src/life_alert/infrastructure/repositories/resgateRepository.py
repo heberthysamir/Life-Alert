@@ -99,12 +99,15 @@ class ResgateRepository:
                 return False
     
     def _instanciar_resgate(self, linha):
-        """Converte linha do banco em objeto Resgate"""
-        if not linha:
-            return None
+        if not linha: return None
+        
+        # Precisamos buscar a ocorrência completa para que a UI tenha os dados
+        from infrastructure.repositories.ocorrenciaRepository import OcorrenciaRepository
+        oc_repo = OcorrenciaRepository()
+        ocorrencia_obj = oc_repo.buscarPorId(linha['ocorrencia_id'])
         
         resgate = Resgate(
-            ocorrencia=linha['ocorrencia_id'],
+            ocorrencia=ocorrencia_obj, # Agora é o objeto, não apenas o ID
             dataInicio=linha['data_inicio'],
             descricao=linha['descricao'],
             dataFim=linha['data_fim'],

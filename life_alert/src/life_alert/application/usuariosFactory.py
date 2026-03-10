@@ -3,7 +3,9 @@ from life_alert.domain.usuarios.UsuarioAtendente import Atendente
 from life_alert.domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioFactory:
-
+    """
+    Classe responsável pela criação de objetos da classe que ela importa.
+    """
     @staticmethod
     def criar(tipo, **dados):
         tipos = {
