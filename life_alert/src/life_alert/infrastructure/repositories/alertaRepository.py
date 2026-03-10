@@ -1,5 +1,5 @@
-from infrastructure.database.connection import getDbConnection
-from domain.Alerta import Alerta
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.Alerta import Alerta
 
 class AlertaRepository:
     """Repository para gerenciar Alertas no banco de dados"""

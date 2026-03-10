@@ -1,4 +1,4 @@
-from domain.Vitima import Vitima
+from life_alert.domain.Vitima import Vitima
 
 class VitimaFactory:
     """

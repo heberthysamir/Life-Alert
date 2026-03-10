@@ -1,16 +1,31 @@
+<<<<<<< HEAD
 import sqlite3
 from infrastructure.database.connection import getDbConnection
 
 class EquipeRepository:
     """Repository para gerenciar Equipes de Resgate com persistência garantida"""
     
+=======
+from life_alert.infrastructure.database.connection import getDbConnection
+
+
+class EquipeRepository:    
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
     def salvar(self, equipe):
         """Salva equipe e garante o vínculo dos agentes no banco"""
         with getDbConnection() as conn:
             cursor = conn.cursor()
             
+            exists = False
             if hasattr(equipe, 'id') and equipe.id:
+<<<<<<< HEAD
                 # UPDATE
+=======
+                cursor.execute("SELECT 1 FROM equipes_resgate WHERE id = ?", (equipe.id,))
+                exists = cursor.fetchone() is not None
+
+            if exists:
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
                 cursor.execute("""
                     UPDATE equipes_resgate
                     SET localidade=?, status=?, setor=?, especialidade=?
@@ -24,7 +39,10 @@ class EquipeRepository:
                 """, (equipe.localidade, equipe.status, equipe.setor, equipe.especialidade))
                 equipe.id = cursor.lastrowid
                 
+<<<<<<< HEAD
                 # --- O PONTO CRÍTICO: SALVAR OS AGENTES DA FACTORY ---
+=======
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
                 if hasattr(equipe, 'agentes') and equipe.agentes:
                     for agente in equipe.agentes:
                         print(f"DEBUG REPO: Vinculando Agente ID {agente.id} à nova Equipe ID {equipe.id}")

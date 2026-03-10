@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from application.alertasService import AlertaService 
+from life_alert.application.alertasService import AlertaService 
 
 # Constantes de Estilo
 PRIMARY = "#c53030"  
@@ -194,6 +194,7 @@ class CivilScreen:
         Lista todas as ocorrências vinculadas ao cidadão logado.
         Utiliza um Treeview para exibição tabular com suporte a rolagem.
         """
+<<<<<<< HEAD
         tk.Label(container, text="MINHAS OCORRÊNCIAS", font=gui.font_header, bg=BG, fg=PRIMARY).pack(pady=20)
         
         todas_ocs = gui.ocorrencia_repo.listarTodos()
@@ -202,6 +203,11 @@ class CivilScreen:
             print(f"Ocorrência {oc.id} lida do banco -> Civil: {oc.civil} | Atendente: {oc.atendente}")
         print("------------------------\n")
         minhas_ocs = [oc for oc in todas_ocs if oc.civil and oc.civil.cpf == gui.usuario_logado.cpf]
+=======
+
+        minhas_ocs = [oc for oc in gui.db.get("ocorrencias", [])
+                     if oc.civil and getattr(oc.civil, "id", None) == gui.usuario_logado.id]
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
 
         if not minhas_ocs:
             tk.Label(container, text="Você ainda não registrou nenhuma ocorrência.", 

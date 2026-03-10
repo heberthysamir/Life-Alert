@@ -1,4 +1,4 @@
-from domain.Relatorio import Relatorio
+from life_alert.domain.Relatorio import Relatorio
 from datetime import datetime
 
 class RelatorioService:

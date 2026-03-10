@@ -1,4 +1,4 @@
-from domain.PerfilMedico import PerfilMedico
+from life_alert.domain.PerfilMedico import PerfilMedico
 
 class PerfilMedicoFactory:
     """

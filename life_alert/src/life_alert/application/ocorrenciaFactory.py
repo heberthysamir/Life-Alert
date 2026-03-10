@@ -1,6 +1,6 @@
-from domain.ocorrencias.Ocorrencia import Ocorrencia
-from domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
-from domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
+from life_alert.domain.ocorrencias.Ocorrencia import Ocorrencia
+from life_alert.domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
+from life_alert.domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
 
 class OcorrenciaFactory:
     """

@@ -1,7 +1,7 @@
-from infrastructure.database.connection import getDbConnection
-from domain.usuarios.UsuarioCivil import Civil
-from domain.usuarios.UsuarioAtendente import Atendente
-from domain.usuarios.UsuarioAgente import Agente
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.usuarios.UsuarioCivil import Civil
+from life_alert.domain.usuarios.UsuarioAtendente import Atendente
+from life_alert.domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioRepository:
     def salvar(self, usuario):
@@ -41,10 +41,10 @@ class UsuarioRepository:
             
             return usuario
 
-    def buscarPorCredenciais(self, email, senha):
+    def buscarPorCredenciais(self, email, _senha):
         with getDbConnection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, senha))
+            cursor.execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, _senha))
             linha = cursor.fetchone()
             return self._instanciar_usuario(linha)
     
@@ -64,12 +64,21 @@ class UsuarioRepository:
             return self._instanciar_usuario(linha)
     
     def buscarPorId(self, id):
+<<<<<<< HEAD
+=======
+        """Retorna um usuário dado seu id (ou None se não existir)."""
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
         with getDbConnection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM usuarios WHERE id = ?", (id,))
             linha = cursor.fetchone()
+<<<<<<< HEAD
             return self._instanciar_usuario(linha)
     
+=======
+            return self._instanciar_usuario(linha) if linha else None
+
+>>>>>>> aad344b18f7c4b637ca42e7bff4b9b5c41c5c565
     def excluir(self, cpf):
         with getDbConnection() as conn:
             cursor = conn.cursor()

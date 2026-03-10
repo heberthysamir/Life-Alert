@@ -1,17 +1,14 @@
-from infrastructure.database.connection import getDbConnection
-from domain.Atendimento import Atendimento
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.Atendimento import Atendimento
 from datetime import datetime
 
 
-class AtendimentoRepository:
-    """Repository para gerenciar Atendimentos no banco de dados"""
-    
+class AtendimentoRepository:    
     def salvar(self, atendimento):
         """Salva ou atualiza atendimento"""
         with getDbConnection() as conn:
             cursor = conn.cursor()
             
-            # Criar tabela de atendimentos se não existir
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS atendimentos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,7 +25,12 @@ class AtendimentoRepository:
                 )
             """)
             
+            exists = False
             if hasattr(atendimento, 'id') and atendimento.id:
+                cursor.execute("SELECT 1 FROM atendimentos WHERE id = ?", (atendimento.id,))
+                exists = cursor.fetchone() is not None
+
+            if exists:
                 cursor.execute("""
                     UPDATE atendimentos
                     SET atendente_id=?, ocorrencia_id=?, civil_id=?, grau_urgencia=?,

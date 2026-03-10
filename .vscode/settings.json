@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": [
+        "./life_alert/src",
+        "./life_alert/src/life_alert"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}

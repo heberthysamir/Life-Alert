@@ -1,15 +1,17 @@
-from infrastructure.database.connection import getDbConnection
-from domain.ocorrencias.Ocorrencia import Ocorrencia
-from domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
-from domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
+from life_alert.infrastructure.database.connection import getDbConnection
+from life_alert.domain.ocorrencias.Ocorrencia import Ocorrencia
+from life_alert.domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
+from life_alert.domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
 from datetime import datetime
+import json
 
 
 class OcorrenciaRepository:
     def salvar(self, ocorrencia):
-        """Salva ou atualiza ocorrência no BD"""
         with getDbConnection() as conn:
             cursor = conn.cursor()
+
+            tipo = "Medica" if isinstance(ocorrencia, OcorrenciaMedica) else ("Policial" if isinstance(ocorrencia, OcorrenciaPolicial) else "geral")
             
             if isinstance(ocorrencia, OcorrenciaMedica):
                 tipo_persistido = "Medica"
@@ -24,7 +26,8 @@ class OcorrenciaRepository:
                     UPDATE ocorrencias
                     SET atendente_id=?, agente_id=?, civil_id=?, equipe_id=?,
                         data_hora=?, status=?, descricao=?, rua=?, bairro=?,
-                        cidade=?, estado=?, gravidade=?, tipo=?, qtd_afetados=?
+                        cidade=?, estado=?, gravidade=?, tipo=?, qtd_afetados=?,
+                        perfil_medico=?, sintomas=?, prontuarios_vitimas=?
                     WHERE id=?
                 """, (
                     getattr(ocorrencia.atendente, 'id', None) if ocorrencia.atendente else None,
@@ -49,8 +52,8 @@ class OcorrenciaRepository:
                     INSERT INTO ocorrencias 
                     (atendente_id, agente_id, civil_id, equipe_id, data_hora,
                      status, descricao, rua, bairro, cidade, estado, gravidade, 
-                     tipo, qtd_afetados)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     tipo, qtd_afetados, perfil_medico, sintomas, prontuarios_vitimas)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     getattr(ocorrencia.atendente, 'id', None) if ocorrencia.atendente else None,
                     getattr(ocorrencia.agente, 'id', None) if ocorrencia.agente else None,
@@ -68,7 +71,7 @@ class OcorrenciaRepository:
                     ocorrencia.qtdAfetados
                 ))
                 ocorrencia.id = cursor.lastrowid
-            
+
             return ocorrencia
 
     def listarTodos(self):
