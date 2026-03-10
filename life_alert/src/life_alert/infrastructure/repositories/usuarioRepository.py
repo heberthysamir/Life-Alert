@@ -24,7 +24,7 @@ class UsuarioRepository:
             """, (
                     usuario.nome, usuario.telefone, usuario.rua, usuario.num, 
                     usuario.bairro, usuario.cidade, usuario.estado, usuario.email, 
-                    usuario.senha, turno, cargo, status, usuario.cpf
+                    usuario._senha, turno, cargo, status, usuario.cpf
                 ))
             else:
                 cursor.execute("""
@@ -34,7 +34,7 @@ class UsuarioRepository:
                 """, (
                     usuario.nome, usuario.cpf, usuario.telefone, usuario.rua, usuario.num, 
                     usuario.bairro, usuario.cidade, usuario.estado, usuario.email, 
-                    usuario.senha, usuario.tipo, turno, cargo, status
+                    usuario._senha, usuario.tipo, turno, cargo, status
                 ))
 
                 usuario.id = cursor.lastrowid
@@ -63,11 +63,38 @@ class UsuarioRepository:
             linha = cursor.fetchone()
             return self._instanciar_usuario(linha)
     
+    def buscarPorId(self, id):
+        with getDbConnection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM usuarios WHERE id = ?", (id,))
+            linha = cursor.fetchone()
+            return self._instanciar_usuario(linha)
+    
     def excluir(self, cpf):
         with getDbConnection() as conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM usuarios WHERE cpf = ?", (cpf,))
             return cursor.rowcount > 0
+    
+    def criar_usuario_temporario(self, id_agente):
+        from domain.usuarios.UsuarioAgente import Agente
+        # Preenchendo todos os 8 argumentos que o Python reclamou que faltavam
+        u = Agente(
+            nome=f"Agente {id_agente}", 
+            cpf="000.000.000-00", 
+            senha="senha123", # <--- Senha com mais de 6 caracteres
+            cidade="Não informada",
+            telefone="000000000",
+            rua="Rua",
+            num="0",
+            bairro="Bairro",
+            estado="ST",
+            email=f"agente{id_agente}@lifealert.com", 
+            cargo="Agente",
+            status="Ativo"
+        )
+        u.id = id_agente
+        return u
     
     def _instanciar_usuario(self, linha):
         if not linha:

@@ -1,6 +1,9 @@
 from domain.PerfilMedico import PerfilMedico
 
 class PerfilMedicoFactory:
+    """
+    Classe responsável pela criação de objetos da classe que ela importa.
+    """
     @staticmethod
     def criar(alergias, doencas, deficiencia, tipo_sanguineo, contatoEmerg):
         return PerfilMedico(

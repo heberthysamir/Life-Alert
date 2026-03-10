@@ -1,6 +1,9 @@
 from domain.Vitima import Vitima
 
 class VitimaFactory:
+    """
+    Classe responsável pela criação de objetos da classe que ela importa.
+    """
     @staticmethod
     def criar(nome, idade, situacao, ocorrencia):
         if not ocorrencia:

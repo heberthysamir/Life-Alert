@@ -1,17 +1,18 @@
 import datetime
 
 class Resgate:
-    _id_auto = 1
-    
-    def __init__(self, ocorrencia, dataInicio=None, descricao="", dataFim=None, qtdResgatados=0):
-        self.id = Resgate._id_auto
-        Resgate._id_auto += 1
+    """
+    Vincula uma equipe à ação em campo e registra o tempo de resposta, 
+    a descrição das ações tomadas e o resultado final (contagem de resgatados).
+    """
+    def __init__(self, ocorrencia, dataInicio=None, descricao="", dataFim=None, qtdResgatados=0,**kwargs):
+        self.id = kwargs.get('id', None)
         self._ocorrencia = None
         self._dataInicio = None
         self._descricao = None
         self._dataFim = None
         self._qtdResgatados = None
-        
+        # Atribuição via setters
         self.ocorrencia = ocorrencia
         self.dataInicio = dataInicio
         self.descricao = descricao
@@ -80,23 +81,12 @@ class Resgate:
             
         self._qtdResgatados = qtd_int
 
-    def adicionarVitima(self, quantidade):
-        try:
-            qtd = int(quantidade)
-            if qtd < 0:
-                raise ValueError("A quantidade de vítimas não pode ser negativa.")
-            
-            self._qtdResgatados += qtd
-            return f"{qtd} vítima(s) adicionada(s) ao resgate com sucesso."
-        except ValueError as e:
-            raise ValueError(f"Valor inválido: {e}")
-
-    def finalizar_resgate(self, dataFim=None):
-        if dataFim is None:
-            self.dataFim = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        else:
-            self.dataFim = dataFim
-        return True
-
     def __str__(self):
-        return f"Resgate #{self.id} | Ocorrência: {self.ocorrencia.id} | Resgatados: {self.qtdResgatados} | Início: {self.dataInicio} | Fim: {self.dataFim}"
+        """Representação para exibição em logs."""
+        status_fim = self.dataFim if self.dataFim else "Em andamento"
+        return (f"Resgate #{self.id} | Ocorrência: {self.ocorrencia.id} | "
+                f"Resgatados: {self.qtdResgatados} | Fim: {status_fim}")
+
+    def __repr__(self):
+        """Representação técnica para depuração."""
+        return f"Resgate(id={self.id}, ocorrencia_id={self.ocorrencia.id}, ativos={self.qtdResgatados})"

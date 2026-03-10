@@ -145,8 +145,9 @@ class LifeAlertGUI:
                  font=("Segoe UI", 10), bg=BG, fg=MUTED, anchor="w").pack(fill=tk.X)
 
         alertas_container = tk.Frame(self.area_conteudo, bg=BG)
-        alertas_container.pack(fill=tk.BOTH, expand=True, padx=20)
-        CivilScreen.render_lista_alertas(self, alertas_container)
+        alertas_container.pack(fill=tk.BOTH, expand=True, padx=40, pady=10)
+        lista_alertas = self.alerta_repo.listarTodos()
+        CivilScreen.render_lista_alertas(self, alertas_container, lista_alertas)
 
         self.usuario_logado.gui_ref = self 
         acoes = self.usuario_logado.obter_funcionalidades()
@@ -166,7 +167,11 @@ class LifeAlertGUI:
 
     # Renderiza a lista de alertas ativos na tela do cidadão
     def tela_central_alertas(self, container):
-        CivilScreen.render_lista_alertas(self,container)
+        for widget in container.winfo_children():
+            widget.destroy()
+            
+        lista = self.alerta_repo.listarTodos()
+        CivilScreen.render_lista_alertas(self, container, lista)
 
     # Renderiza o formulário para abertura de novas ocorrências
     def tela_criar_ocorrencia(self, container):
@@ -287,6 +292,10 @@ class LifeAlertGUI:
             })
 
             nova_oc = OcorrenciaFactory.criar(id_tipo_principal, **dados)
+            print(f"--- DEBUG DE CRIAÇÃO ---")
+            print(f"Civil vinculado: {nova_oc.civil}")
+            print(f"Atendente vinculado: {nova_oc.atendente}")
+            print(f"------------------------")
             self.ocorrencia_repo.salvar(nova_oc)
 
             from application.atendimentoService import AtendimentoService
@@ -440,34 +449,46 @@ class LifeAlertGUI:
             idx_combo = self.combo_oc_alerta.current()
             if idx_combo == -1: raise Exception("Selecione uma ocorrência.")
 
-            # Buscar ocorrência do banco de dados
-            ocorrencias = self.ocorrencia_repo.listarTodos()
-            if idx_combo >= len(ocorrencias):
-                raise Exception("Ocorrência inválida.")
-            
-            oc_base = ocorrencias[idx_combo]
+            # --- CORREÇÃO: Recuperar o objeto correto que foi armazenado no render ---
+            # No AtendenteScreen, você deve salvar a lista filtrada em gui.lista_objetos_oc_alerta
+            oc_base = self.lista_objetos_oc_alerta[idx_combo]
             
             dados = {
-                "titulo": self.ent_titulo_alerta.get(),
+                "titulo": self.ent_titulo_alerta.get().strip(),
                 "mensagem": self.txt_msg_alerta.get("1.0", tk.END).strip(),
                 "ocorrencia": oc_base,
                 "escopo": self.combo_escopo.get(),
-                "horario": datetime.now().strftime("%H:%M:%S")
+                "horario": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
 
+            if not dados["titulo"] or not dados["mensagem"]:
+                raise Exception("Título e Mensagem são obrigatórios.")
+
             novo_alerta = AlertaFactory.criar_alerta(**dados)
-            # Salvar alerta no banco de dados
+            
+            # Salvar no banco
             self.alerta_repo.salvar(novo_alerta)
+            
             messagebox.showinfo("Sucesso", "Alerta disparado para a população!")
-            self.mostrar_dashboard()
+            self.mostrar_dashboard() # Atualiza a tela e limpa os campos
+            
         except Exception as e:
             messagebox.showerror("Erro", str(e))
 
     def logica_cancelar_alerta(self, id_alerta):
-        if messagebox.askyesno("Confirmar", "Deseja cancelar este alerta?"):
-            # Remover alerta do banco de dados
-            self.alerta_repo.excluir(id_alerta)
-            self.mostrar_dashboard()
+        if messagebox.askyesno("Confirmar", "Deseja cancelar este alerta permanentemente?"):
+            try:
+                # Chama o método que acabamos de adicionar
+                sucesso = self.alerta_repo.excluir(id_alerta)
+                
+                if sucesso:
+                    messagebox.showinfo("Sucesso", "Alerta removido com sucesso!")
+                    # Recarrega o dashboard para limpar a tela
+                    self.mostrar_dashboard() 
+                else:
+                    messagebox.showwarning("Aviso", "Alerta não encontrado ou já removido.")
+            except Exception as e:
+                messagebox.showerror("Erro", f"Erro técnico ao excluir: {e}")
 
     # Altera propriedades de um atendimento selecionado ou encerra seu ciclo básico
     def logica_atualizar_atendimento(self, tabela, lista_atendimentos):
@@ -509,21 +530,28 @@ class LifeAlertGUI:
         try:
             urgencia = self.ent_urgencia.get()
             relatorio = self.txt_relatorio.get("1.0", tk.END).strip()
-            idx_equipe = self.ent_equipe_resgate.current()
+            
+            # Pega o texto exato que está selecionado na caixinha
+            texto_equipe = self.ent_equipe_resgate.get()
 
-            if not urgencia or idx_equipe == -1:
-                messagebox.showwarning("Aviso", "Preencha a urgência e selecione uma equipe!")
+            # Validações básicas
+            if not urgencia or not texto_equipe or texto_equipe == "Nenhuma equipe disponível na sua cidade":
+                messagebox.showwarning("Aviso", "Preencha a urgência e selecione uma equipe válida!")
                 return
 
             atendimento.grauUrgencia = urgencia
             atendimento.ocorrencia.complemento = relatorio
             
-            equipes = self.equipe_repo.listarTodos()
-            if idx_equipe >= len(equipes):
-                raise Exception("Equipe inválida.")
+            parte_id = texto_equipe.split("|")[0]
+            id_numero = int(parte_id.replace("ID:", "").strip())
             
-            equipe_sel = equipes[idx_equipe]
+            # Agora buscamos a equipe correta e definitiva pelo ID!
+            equipe_sel = self.equipe_repo.buscarPorId(id_numero)
             
+            if not equipe_sel:
+                raise Exception("Equipe não encontrada no banco de dados.")
+            
+            # Atualiza os status
             if hasattr(equipe_sel, 'agentes'):
                 for agente in equipe_sel.agentes:
                     agente.status = "Em ocorrência"
@@ -531,10 +559,12 @@ class LifeAlertGUI:
             equipe_sel.status = "Em ocorrência"
             self.equipe_repo.salvar(equipe_sel)
             
+            # Vincula a equipe à ocorrência e salva
             atendimento.ocorrencia.equipe = equipe_sel
             atendimento.ocorrencia.status = "Encaminhada para Resgate"
             self.ocorrencia_repo.salvar(atendimento.ocorrencia)
 
+            # Finaliza o atendimento e salva
             atendimento.finalizarAtendimento([])
             self.atendimento_repo.salvar(atendimento)
 
@@ -549,7 +579,7 @@ class LifeAlertGUI:
         try:
             ocorrencia.status = "Em Resgate"
             if ocorrencia.equipe:
-                ocorrencia.equipe.status = "Em atendimento"
+                ocorrencia.equipe.status = "Em ocorrência"
                 for agente in ocorrencia.equipe.agentes:
                     agente.status = "Em ocorrência"
                 self.equipe_repo.salvar(ocorrencia.equipe)
@@ -567,57 +597,46 @@ class LifeAlertGUI:
     # Valida pendências, gera histórico e finaliza o ciclo de vida de uma ocorrência
     def logica_concluir_resgate_direto(self, ocorrencia, relato, total_vitimas):
         try:
-            # 1. Validação de Vítimas Perdidas
-            v_perdidas = self.vitima_repo.buscarPorSituacao("Perdido")
-            v_perdidas = [v for v in v_perdidas if v.ocorrencia == ocorrencia.id]
-            if v_perdidas:
-                return messagebox.showerror("Erro", "Há vítimas com status 'Perdido'. Resolva antes de fechar.")
-            
-            agora = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-            
-            novo_resgate = Resgate(
-                ocorrencia=ocorrencia,
-                dataInicio=ocorrencia.dataHora, 
-                descricao=relato,
-                dataFim=agora,
-                qtdResgatados=total_vitimas
-            )
-            
-            # Salvar resgate no banco de dados
-            self.resgate_repo.salvar(novo_resgate)
-
+            # 1. Finaliza a ocorrência
             ocorrencia.status = "Finalizada"
-            ocorrencia.hora_finalizado = agora 
-            
-            if ocorrencia.equipe:
-                ocorrencia.equipe.status = "Disponível"
-                for ag in ocorrencia.equipe.agentes:
-                    ag.status = "Disponível"
-                self.equipe_repo.salvar(ocorrencia.equipe)
-            
-            # Salvar ocorrência finalizada
+            ocorrencia.relato_final = relato
             self.ocorrencia_repo.salvar(ocorrencia)
-
-            messagebox.showinfo("Sucesso", "Resgate finalizado e histórico salvo!")
-            self.mostrar_dashboard()
+            
+            # 2. Libera a equipe (Voltando para um status permitido pelo seu domínio)
+            if ocorrencia.equipe:
+                ocorrencia.equipe.status = "Disponível" # Status aceito na validação
+                for agente in ocorrencia.equipe.agentes:
+                    agente.status = "Disponível"
+                self.equipe_repo.salvar(ocorrencia.equipe)
+                
+            messagebox.showinfo("Sucesso", f"Resgate concluído com {total_vitimas} vítimas!")
+            self.tela_painel_operacional(self.area_conteudo) # Volta para o painel
             
         except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao fechar resgate: {e}")
+            messagebox.showerror("Erro", f"Falha ao concluir resgate: {e}")
             
     # Cria uma nova instância de vítima vinculada a uma ocorrência e salva no banco
-    def logica_salvar_vitima(self, nome, situacao, oc_str):
-        if not nome or not situacao or not oc_str:
-            return messagebox.showerror("Erro", "Preencha todos os campos corretamente.")
-        
+    def logica_salvar_vitima(self, nome, idade_str, situacao, resgate_obj):
+        """
+        Salva a vítima vinculando-a ao Atendimento/Resgate selecionado.
+        Garante que a idade seja um inteiro para satisfazer o Domínio.
+        """
         try:
-            id_oc = int(oc_str.split(" - ")[0])
-            oc = next(o for o in self.db["ocorrencias"] if o.id == id_oc)
+            # Validação de Idade (Evita o erro ValueError: 'N/A')
+            idade_val = int(idade_str) if str(idade_str).isdigit() else 0
             
+            if not nome or not situacao or not resgate_obj:
+                return messagebox.showwarning("Aviso", "Preencha todos os campos corretamente.")
+
+            # Criação via Factory (passando o objeto de resgate/atendimento)
+            nova_v = VitimaFactory.criar(nome, idade_val, situacao, resgate_obj)
             
-            messagebox.showinfo("Sucesso", f"Vítima {nome} vinculada à ocorrência #{id_oc}")
-            self.mostrar_dashboard()
+            # Persistência via Repositório
+            self.vitima_repo.salvar(nova_v)
             
-        except StopIteration:
-            messagebox.showerror("Erro", "Ocorrência selecionada não foi encontrada no sistema.")
+            messagebox.showinfo("Sucesso", f"Vítima {nome} vinculada ao Resgate #{resgate_obj.id}")
+            # Retorna para a tela de gestão
+            AgenteScreen.render_gerenciar_vitimas(self, self.area_conteudo)
+            
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao salvar vítima: {str(e)}")

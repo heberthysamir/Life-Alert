@@ -3,7 +3,9 @@ from domain.usuarios.UsuarioAtendente import Atendente
 from domain.usuarios.UsuarioAgente import Agente
 
 class UsuarioFactory:
-
+    """
+    Classe responsável pela criação de objetos da classe que ela importa.
+    """
     @staticmethod
     def criar(tipo, **dados):
         tipos = {

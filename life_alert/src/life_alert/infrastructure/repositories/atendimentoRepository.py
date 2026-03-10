@@ -110,14 +110,25 @@ class AtendimentoRepository:
         if not linha:
             return None
         
+        from .usuarioRepository import UsuarioRepository
+        from .ocorrenciaRepository import OcorrenciaRepository
+        
+        user_repo = UsuarioRepository()
+        oc_repo = OcorrenciaRepository()
+        
+        atendente_obj = user_repo.buscarPorId(linha['atendente_id']) if linha['atendente_id'] else None
+        civil_obj = user_repo.buscarPorId(linha['civil_id']) if linha['civil_id'] else None
+        ocorrencia_obj = oc_repo.buscarPorId(linha['ocorrencia_id']) if linha['ocorrencia_id'] else None
+        
         atendimento = Atendimento(
-            atendente=None,
-            ocorrencia=None,
-            civil=None,
+            atendente=atendente_obj,
+            ocorrencia=ocorrencia_obj,
+            civil=civil_obj,
             grauUrgencia=linha['grau_urgencia'],
             relatorio=linha['relatorio'],
             horaInicio=linha['hora_inicio'],
             horaFinal=linha['hora_final']
         )
         atendimento.id = linha['id']
+        
         return atendimento

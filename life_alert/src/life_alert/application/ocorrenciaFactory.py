@@ -3,6 +3,9 @@ from domain.ocorrencias.OcorrenciaPolicial import OcorrenciaPolicial
 from domain.ocorrencias.OcorrenciaMedica import OcorrenciaMedica
 
 class OcorrenciaFactory:
+    """
+    Classe responsável pela criação de objetos da classe que ela importa.
+    """
     @staticmethod
     def criar(tipo_id, **kwargs):
         if tipo_id == "1":
